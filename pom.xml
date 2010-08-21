@@ -25,7 +25,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <includes>
-                        <include>org/n52/wps/**</include>
+                        <!--<include>org/n52/wps/**</include>-->
+                        <include>tikouka/nl/wps/**</include>
                     </includes>
                     <source>1.5</source>
                     <target>1.5</target>
@@ -66,5 +67,10 @@
   		<artifactId>52n-wps-commons</artifactId>
                 <version>${project.version}</version>
       </dependency>
+      <dependency>
+            <groupId>dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+            <version>1.6</version>
+	</dependency>
   </dependencies>
 </project>
