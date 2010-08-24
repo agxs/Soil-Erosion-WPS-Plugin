@@ -95,7 +95,7 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
         if(inputData==null || !inputData.containsKey("rain_factor")){
 			throw new RuntimeException("Error while allocating input parameters");
 		}
-        Double rain_factor[] = new Double[1];
+        double rain_factor[] = new double[1];
         rain_factor[0] = ((LiteralDoubleBinding) inputData.get("rain_factor").get(0)).getPayload();
 
         if(inputData==null || !inputData.containsKey("nz_woody")){
@@ -130,8 +130,8 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
 
         res_env.setRect((int)res_env.x, (int)res_env.y, (int)res_env.width, (int)res_env.height);
 
-        //ParameterValueGroup param = processor.getOperation("CoverageCrop").getParameters();
-        ParameterValueGroup param = processor.getOperation("crop").getParameters();
+        ParameterValueGroup param = processor.getOperation("CoverageCrop").getParameters();
+        //ParameterValueGroup param = processor.getOperation("crop").getParameters();
         param.parameter("Source").setValue(nz_woody);
         param.parameter("envelope").setValue(res_env);
         GridCoverage2D nz_woody_cr = (GridCoverage2D) processor.doOperation(param);
@@ -145,10 +145,11 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
         GridCoverage2D nz_r2_cr = (GridCoverage2D) processor.doOperation(param);
 
         //first step is to multiply the r2 coverage with the rain factor
-        ParameterValueGroup param2 = processor.getOperation("multiply").getParameters();
-        param2.parameter("source").setValue(nz_r2_cr);
+        //ParameterValueGroup param2 = processor.getOperation("multiply").getParameters();
+        ParameterValueGroup param2 = processor.getOperation("MultiplyConst").getParameters();
+        param2.parameter("Source").setValue(nz_r2_cr);
         param2.parameter("constants").setValue(rain_factor);
-        GridCoverage2D nz_r2_cr2 = (GridCoverage2D) processor.doOperation(param);
+        GridCoverage2D nz_r2_cr2 = (GridCoverage2D) processor.doOperation(param2);
 
         int minX = (int)res_env.getMinX();
         int maxX = (int)res_env.getMaxX();
@@ -193,12 +194,17 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
                     Point2D pt = new DirectPosition2D(x, y);
                     
                     nz_woody_cr.evaluate(pt, woodyval);
+                    System.out.println("woodyval: "+ woodyval[0]);
                     nz_r2_cr2.evaluate(pt, r2_rval);
+                    System.out.println("r2: "+ r2_rval[0]);
                     nz_ak2_cr.evaluate(pt, ak2_rval);
+                    System.out.println("ak2: "+ ak2_rval[0]);
 
                     double woodyvallookup = woodylutList.get(woodyval[0]).getValue();
                     //System.out.println(luval[0]);
                    out[0] = woodyvallookup * r2_rval[0] * ak2_rval[0];
+                   System.out.println("out: " + out[0]);
+                   raster.setPixel( (x - minX) / x_x, (y - minY) / y_y, out);
                 }
             }
         }catch(NullPointerException npe){
@@ -217,9 +223,9 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
         raster = op.filter(raster,null);
 
         GridCoverageFactory coverageFactory = new GridCoverageFactory();
-        double[] testres = new double[1];
-        raster.getPixel(0, 0, testres);
-        System.out.println(testres[0]);
+//        double[] testres = new double[1];
+//        raster.getPixel(0, 0, testres);
+//        System.out.println(testres[0]);
 
         //MathTransform mt = landuse_cr.getGridGeometry().getGridToCRS();
         //GridSampleDimension[] gsd = new GridSampleDimension[raster.getNumBands()];
@@ -261,7 +267,7 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
 					String key = xmlTable.attributeValue("key");
                                         String value = xmlTable.attributeValue("value");
 
-					lookuptable temp = new lookuptable(RasterTableName + ":" + id, key, Double.parseDouble(value));
+					lookuptable temp = new lookuptable(RasterTableName + ":" + id, key, Integer.parseInt(value));
 
 					list.add(temp);
 				}

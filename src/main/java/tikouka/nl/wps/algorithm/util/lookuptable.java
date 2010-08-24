@@ -13,7 +13,7 @@ public class lookuptable {
 
     private String id;
     private String key;
-    private double value;
+    private Integer value;
 
     public String getId() {
         return id;
@@ -35,7 +35,7 @@ public class lookuptable {
         this.key = key;
     }
 
-    public void setValue(double value) {
+    public void setValue(Integer value) {
         this.value = value;
     }
 
@@ -44,7 +44,7 @@ public class lookuptable {
         key = "";
     }
 
-    public lookuptable(String pId, String pKey, double pValue) {
+    public lookuptable(String pId, String pKey, Integer pValue) {
         id = pId;
         key = pKey;
         value = pValue;

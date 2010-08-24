@@ -28,13 +28,13 @@ http://geoserver.itc.nl:8080/wps/schemas/wps/1.0.0/wpsDescribeProcess_response.x
 					<Default>
 						<Format>
 							<MimeType>text/XML</MimeType>
-							<Schema>http://arwen/schemas/RasterTable.xsd</Schema>
+							<Schema>http://tikouka/schemas/RasterTable.xsd</Schema>
 						</Format>
 					</Default>
 					<Supported>
 						<Format>
 							<MimeType>text/XML</MimeType>
-							<Schema>http://arwen/schemas/RasterTable.xsd</Schema>
+							<Schema>http://tikouka/schemas/RasterTable.xsd</Schema>
 						</Format>
 					</Supported>
 				</ComplexData>
