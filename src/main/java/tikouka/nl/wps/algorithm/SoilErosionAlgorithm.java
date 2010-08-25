@@ -161,9 +161,11 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
         int height = (int)res_env.getHeight()/100;
         int y_y =  (int)((maxY - minY)/(height));
 
-        BufferedImage image = new BufferedImage((int)width,(int)height, BufferedImage.TYPE_BYTE_GRAY);
-        WritableRaster raster = image.getRaster();
-
+        //BufferedImage image = new BufferedImage((int)width,(int)height, BufferedImage.TYPE_BYTE_GRAY);
+        //BufferedImage image = new BufferedImage((int)width,(int)height, BufferedImage.TYPE_3BYTE_BGR);
+        //WritableRaster raster = image.getRaster();
+        float[][] raster = new float[height][width];
+        
         /* Algorithm:
          * a is the geology & slope information
          * C is the land use, either woody/forest or other bare ground/grass
@@ -191,20 +193,24 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
                     double[] ak2_rval = new double[1];
                     double[] out = new double[1];
 
+
                     Point2D pt = new DirectPosition2D(x, y);
                     
                     nz_woody_cr.evaluate(pt, woodyval);
-                    System.out.println("woodyval: "+ woodyval[0]);
+                    //System.out.println("woodyval: "+ woodyval[0]);
                     nz_r2_cr2.evaluate(pt, r2_rval);
-                    System.out.println("r2: "+ r2_rval[0]);
+                    //System.out.println("r2: "+ r2_rval[0]);
                     nz_ak2_cr.evaluate(pt, ak2_rval);
-                    System.out.println("ak2: "+ ak2_rval[0]);
+                    //System.out.println("ak2: "+ ak2_rval[0]);
 
                     double woodyvallookup = woodylutList.get(woodyval[0]).getValue();
                     //System.out.println(luval[0]);
-                   out[0] = woodyvallookup * r2_rval[0] * ak2_rval[0];
-                   System.out.println("out: " + out[0]);
-                   raster.setPixel( (x - minX) / x_x, (y - minY) / y_y, out);
+                    //out[0] = woodyvallookup * r2_rval[0] * ak2_rval[0];
+                    out[0] = woodyvallookup * r2_rval[0] * ak2_rval[0];
+                    raster[y-minY][x-minX]= (float)out[0];
+                    //out[0] = woodyvallookup * r2_rval[0] * ak2_rval[0];
+                   //System.out.println("out: " + out[0]);
+                   //raster.setPixel( (x - minX) / x_x, (y - minY) / y_y,out);
                 }
             }
         }catch(NullPointerException npe){
@@ -217,10 +223,10 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
 
         //for some reason the image is flipped vertically.
         //Use a transformation to flip it back before writing the coverage
-        AffineTransform at = AffineTransform.getScaleInstance(1, -1);
-        at.translate(0, -image.getHeight(null));
-        AffineTransformOp op = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-        raster = op.filter(raster,null);
+//        AffineTransform at = AffineTransform.getScaleInstance(1, -1);
+//        at.translate(0, -image.getHeight(null));
+//        AffineTransformOp op = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+//        raster = op.filter(raster,null);
 
         GridCoverageFactory coverageFactory = new GridCoverageFactory();
 //        double[] testres = new double[1];
