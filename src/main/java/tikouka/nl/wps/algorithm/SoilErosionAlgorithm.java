@@ -155,11 +155,13 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
         int maxX = (int)res_env.getMaxX();
         int width = (int)res_env.getWidth()/100;
         int x_x =  (int)((maxX - minX)/(width));
+        int i = 0;
 
         int minY = (int)res_env.getMinY();
         int maxY = (int)res_env.getMaxY();
         int height = (int)res_env.getHeight()/100;
         int y_y =  (int)((maxY - minY)/(height));
+        int j = 0;
 
         //BufferedImage image = new BufferedImage((int)width,(int)height, BufferedImage.TYPE_BYTE_GRAY);
         //BufferedImage image = new BufferedImage((int)width,(int)height, BufferedImage.TYPE_3BYTE_BGR);
@@ -187,6 +189,7 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
 
         try{
             for (int y=minY + (y_y/2) ;y < maxY;y+= y_y){
+                i=0;
                 for (int x = minX + (x_x/2) ;x < maxX;x+= x_x){
                     int[] woodyval= new int[1];
                     double[] r2_rval = new double[1];
@@ -207,11 +210,18 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
                     //System.out.println(luval[0]);
                     //out[0] = woodyvallookup * r2_rval[0] * ak2_rval[0];
                     out[0] = woodyvallookup * r2_rval[0] * ak2_rval[0];
-                    raster[y-minY][x-minX]= (float)out[0];
+
+                    raster[j][i]= (float)out[0];
+
+
                     //out[0] = woodyvallookup * r2_rval[0] * ak2_rval[0];
-                   //System.out.println("out: " + out[0]);
+                    System.out.println("raster y: " + String.valueOf(j));
+                    System.out.println("raster x: " + String.valueOf(i));
+                    System.out.println("raster out: " + raster[j][i]);
                    //raster.setPixel( (x - minX) / x_x, (y - minY) / y_y,out);
+                   i++;
                 }
+                j++;
             }
         }catch(NullPointerException npe){
             npe.printStackTrace();
@@ -242,6 +252,7 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
         // ############################################################
         HashMap<String,IData> resulthash = new HashMap<String,IData>();
         try{
+            //TODO: java.lang.IllegalArgumentException: Illegal transform of type "LinearTransform1D"
             GridCoverage2D coverage = coverageFactory.create("output", raster,res_env);
 
             resulthash.put("result", new GTRasterDataBinding(coverage));
