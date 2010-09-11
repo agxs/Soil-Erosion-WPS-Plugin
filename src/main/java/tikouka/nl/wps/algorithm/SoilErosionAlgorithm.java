@@ -5,14 +5,9 @@
 
 package tikouka.nl.wps.algorithm;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.AffineTransformOp;
-import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
 import java.awt.image.WritableRaster;
 import java.io.ByteArrayInputStream;
 import java.lang.String;
@@ -20,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.media.jai.RasterFactory;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
@@ -166,7 +162,9 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
         //BufferedImage image = new BufferedImage((int)width,(int)height, BufferedImage.TYPE_BYTE_GRAY);
         //BufferedImage image = new BufferedImage((int)width,(int)height, BufferedImage.TYPE_3BYTE_BGR);
         //WritableRaster raster = image.getRaster();
-        float[][] raster = new float[height][width];
+        WritableRaster raster = RasterFactory.createBandedRaster(DataBuffer.TYPE_FLOAT, (int)width, (int)height, 1, null);
+
+        //float[][] raster = new float[height][width];
         
         /* Algorithm:
          * a is the geology & slope information
@@ -211,14 +209,15 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
                     //out[0] = woodyvallookup * r2_rval[0] * ak2_rval[0];
                     out[0] = woodyvallookup * r2_rval[0] * ak2_rval[0];
 
-                    raster[j][i]= (float)out[0];
+                    //raster[j][i]= (float)out[0];
 
 
                     //out[0] = woodyvallookup * r2_rval[0] * ak2_rval[0];
-                    System.out.println("raster y: " + String.valueOf(j));
-                    System.out.println("raster x: " + String.valueOf(i));
-                    System.out.println("raster out: " + raster[j][i]);
-                   //raster.setPixel( (x - minX) / x_x, (y - minY) / y_y,out);
+                    //System.out.println("raster y: " + String.valueOf(j));
+                    //System.out.println("raster x: " + String.valueOf(i));
+                    //System.out.println("raster out: " + raster[j][i]);
+                    raster.setPixel( (x - minX) / x_x, (y - minY) / y_y,out);
+                    //raster.setPixel( (x - minX - (x_x/2)) / x_x, (y - minY - (y_y/2)) / y_y, out);
                    i++;
                 }
                 j++;
@@ -234,7 +233,7 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
         //for some reason the image is flipped vertically.
         //Use a transformation to flip it back before writing the coverage
 //        AffineTransform at = AffineTransform.getScaleInstance(1, -1);
-//        at.translate(0, -image.getHeight(null));
+//        at.translate(0, -raster.getHeight());
 //        AffineTransformOp op = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
 //        raster = op.filter(raster,null);
 
@@ -243,10 +242,16 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
 //        raster.getPixel(0, 0, testres);
 //        System.out.println(testres[0]);
 
-        //MathTransform mt = landuse_cr.getGridGeometry().getGridToCRS();
+        //MathTransform mt = nz_woody_cr.getGridGeometry().getGridToCRS();
+        //MathTransform mt = nz_woody_cr.getGridGeometry().getGridToCRS();
+        //mt.transform(raster, minY + (y_y/2), raster, minX + (x_x/2), width*height);
         //GridSampleDimension[] gsd = new GridSampleDimension[raster.getNumBands()];
-        //CoordinateReferenceSystem crs = landuse.getCoordinateReferenceSystem();
+        //CoordinateReferenceSystem crs = nz_woody.getCoordinateReferenceSystem();
 
+        //System.out.println("bounds: " + raster.getBounds().toString());
+        //System.out.println("numbands: " + raster.getNumBands());
+        //System.out.println("mt: " + mt.toWKT());
+        //raster.createCompatibleWritableRaster();
         // ############################################################
         //  WRITE THE OUTPUT DATA
         // ############################################################
@@ -254,6 +259,9 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
         try{
             //TODO: java.lang.IllegalArgumentException: Illegal transform of type "LinearTransform1D"
             GridCoverage2D coverage = coverageFactory.create("output", raster,res_env);
+            //Envelope2D env = new Envelope2D(crs,raster.getBounds());
+            //GridCoverage2D coverage = coverageFactory.create("output", raster,env);
+            //GridCoverage2D coverage = coverageFactory.create("output", raster,crs,mt.inverse(),gsd);
 
             resulthash.put("result", new GTRasterDataBinding(coverage));
          }catch(Exception e){
