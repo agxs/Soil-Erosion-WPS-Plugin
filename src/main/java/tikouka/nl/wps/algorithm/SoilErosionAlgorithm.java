@@ -5,9 +5,11 @@
 
 package tikouka.nl.wps.algorithm;
 
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.DataBuffer;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.ByteArrayInputStream;
 import java.lang.String;
@@ -15,12 +17,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.media.jai.RasterFactory;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
-import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.processing.AbstractProcessor;
@@ -34,8 +34,6 @@ import org.n52.wps.io.data.binding.literal.LiteralStringBinding;
 import org.n52.wps.server.AbstractObservableAlgorithm;
 import tikouka.nl.wps.algorithm.util.lookuptable;
 import org.opengis.parameter.ParameterValueGroup;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
 
 /**
  *
@@ -159,10 +157,10 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
         int y_y =  (int)((maxY - minY)/(height));
         int j = 0;
 
-        //BufferedImage image = new BufferedImage((int)width,(int)height, BufferedImage.TYPE_BYTE_GRAY);
+        BufferedImage image = new BufferedImage((int)width,(int)height, BufferedImage.TYPE_BYTE_GRAY);
         //BufferedImage image = new BufferedImage((int)width,(int)height, BufferedImage.TYPE_3BYTE_BGR);
-        //WritableRaster raster = image.getRaster();
-        WritableRaster raster = RasterFactory.createBandedRaster(DataBuffer.TYPE_FLOAT, (int)width, (int)height, 1, null);
+        WritableRaster raster = image.getRaster();
+        //WritableRaster raster = RasterFactory.createBandedRaster(DataBuffer.TYPE_FLOAT, (int)width, (int)height, 1, null);
 
         //float[][] raster = new float[height][width];
         
@@ -232,10 +230,10 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
 
         //for some reason the image is flipped vertically.
         //Use a transformation to flip it back before writing the coverage
-//        AffineTransform at = AffineTransform.getScaleInstance(1, -1);
-//        at.translate(0, -raster.getHeight());
-//        AffineTransformOp op = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-//        raster = op.filter(raster,null);
+        AffineTransform at = AffineTransform.getScaleInstance(1, -1);
+        at.translate(0, -raster.getHeight());
+        AffineTransformOp op = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+        raster = op.filter(raster,null);
 
         GridCoverageFactory coverageFactory = new GridCoverageFactory();
 //        double[] testres = new double[1];
