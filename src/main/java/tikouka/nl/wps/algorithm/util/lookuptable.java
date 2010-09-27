@@ -50,4 +50,5 @@ public class lookuptable {
         value = pValue;
 
     }
+
 }

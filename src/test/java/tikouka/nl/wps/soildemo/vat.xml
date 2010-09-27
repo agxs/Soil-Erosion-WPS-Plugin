@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+    Document   : vat.xml
+    Created on : September 24, 2010, 4:40 PM
+    Author     : niels
+    Description:
+        Purpose of the document follows.
+-->
+
+<ComplexData xmlns:lut="http://tikouka.nl/RasterTable/lut" schema="http://tikouka/schemas/RasterTable.xsd">
+                    <lut:RasterTable name="nz_woody_lookup">
+                        <lut:Table id="0" key="Undefined" value="0"/>
+                        <lut:Table id="1" key="Water" value="0"/>
+                        <lut:Table id="2" key="Bare Ground" value="10"/>
+			<lut:Table id="3" key="Woody" value="1"/>
+			<lut:Table id="4" key="Herbaceous" value="10"/>
+			<lut:Table id="6" key="Primarily Bare" value="10"/>
+			<lut:Table id="7" key="Snow" value="10"/>
+                    </lut:RasterTable>
+                </ComplexData>

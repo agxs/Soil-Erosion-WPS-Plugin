@@ -12,15 +12,23 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.lang.String;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
+//import org.dom4j.Document;
+//import org.dom4j.DocumentException;
+//import org.dom4j.Element;
+//import org.dom4j.io.SAXReader;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+//import org.dom4j.Document;
+//import org.dom4j.DocumentException;
+//import org.dom4j.Element;
+//import org.dom4j.io.SAXReader;
+import javax.xml.parsers.SAXParserFactory;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.processing.AbstractProcessor;
@@ -32,8 +40,10 @@ import org.n52.wps.io.data.binding.complex.GTRasterDataBinding;
 import org.n52.wps.io.data.binding.literal.LiteralDoubleBinding;
 import org.n52.wps.io.data.binding.literal.LiteralStringBinding;
 import org.n52.wps.server.AbstractObservableAlgorithm;
-import tikouka.nl.wps.algorithm.util.lookuptable;
 import org.opengis.parameter.ParameterValueGroup;
+import org.xml.sax.SAXException;
+import tikouka.nl.wps.algorithm.util.Table;
+import tikouka.nl.wps.handler.XMLHandler;
 
 /**
  *
@@ -110,7 +120,9 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
         //  PARSE THE LOOKUPTABLE
         // ############################################################
 
-        List<lookuptable> woodylutList = new ArrayList<lookuptable>();
+        //List<lookuptable> woodylutList = new ArrayList<lookuptable>();
+        //RasterTable rastertable = new RasterTable();
+        List<Table> woodylutList = new ArrayList<Table>();
         getLookupTableData(nz_woody_lookup, woodylutList);
 
         // ############################################################
@@ -203,6 +215,7 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
                     //System.out.println("ak2: "+ ak2_rval[0]);
 
                     double woodyvallookup = woodylutList.get(woodyval[0]).getValue();
+
                     //System.out.println(luval[0]);
                     //out[0] = woodyvallookup * r2_rval[0] * ak2_rval[0];
                     out[0] = woodyvallookup * r2_rval[0] * ak2_rval[0];
@@ -268,39 +281,78 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
         return resulthash;
     }
 
-    private void getLookupTableData(List<IData> lookup, List<lookuptable> list)
+    private void getLookupTableData(List<IData> lookup,List<Table> rastertableatt)
 	{
 		try
 		{
-			SAXReader reader = new SAXReader();
-			Document document = reader.read(new ByteArrayInputStream(((LiteralStringBinding) lookup.get(0)).getPayload().getBytes()));
+                   // XMLReader xr = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
+                   SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
 
-			List<Element> xmlRasterTableList = (List<Element>) document.getRootElement().elements();
+                    XMLHandler handler = new XMLHandler();
 
-			for (Element xmlRasterTable : xmlRasterTableList)
-			{
-				String RasterTableName = xmlRasterTable.attributeValue("id");
+                    parser.setProperty("http://xml.org/sax/properties/lexical-handler", handler);
+                    parser.parse(new ByteArrayInputStream(((LiteralStringBinding) lookup.get(0)).getPayload().getBytes()), handler);
 
-				List<Element> xmlTableList = (List<Element>) xmlRasterTable.elements();
+                    rastertableatt = handler.getRasterRable().getTable();
 
-				for (Element xmlTable : xmlTableList)
-				{
 
-					String id = xmlTable.attributeValue("id");
-					String key = xmlTable.attributeValue("key");
-                                        String value = xmlTable.attributeValue("value");
+                }catch(SAXException se){
+                    se.printStackTrace();
+                    throw new RuntimeException(se);
+                }catch(ParserConfigurationException pe){
+                    pe.printStackTrace();
+                    throw new RuntimeException(pe);
+                }catch(IOException ioe){
+                    ioe.printStackTrace();
+                    throw new RuntimeException(ioe);
+                }
 
-					lookuptable temp = new lookuptable(RasterTableName + ":" + id, key, Integer.parseInt(value));
 
-					list.add(temp);
-				}
-			}
-
-		}
-		catch (DocumentException e)
-		{
-			e.printStackTrace();
-			throw new RuntimeException(e);
-		}
+			//SAXReader reader = new SAXReader();
+//			Document document = reader.read(new ByteArrayInputStream(((LiteralStringBinding) lookup.get(0)).getPayload().getBytes()));
+//
+//			List<Element> xmlRasterTableList = (List<Element>) document.getRootElement().elements();
+//
+//			for (Element xmlRasterTable : xmlRasterTableList)
+//			{
+//				String RasterTableName = xmlRasterTable.attributeValue("id");
+//
+//				List<Element> xmlTableList = (List<Element>) xmlRasterTable.elements();
+//
+//				for (Element xmlTable : xmlTableList)
+//				{
+//
+//					String id = xmlTable.attributeValue("id");
+//					String key = xmlTable.attributeValue("key");
+//                                        String value = xmlTable.attributeValue("value");
+//
+//					lookuptable temp = new lookuptable(RasterTableName + ":" + id, key, Integer.parseInt(value));
+//
+//					list.add(temp);
+//				}
+//			}
+//
+//		}
+//		catch (DocumentException e)
+//		{
+//			e.printStackTrace();
+//			throw new RuntimeException(e);
+//		}
+//                lookuptable temp = new lookuptable("nz_woody_lookup" + ":" + "0", "Undefined", Integer.parseInt("0"));
+//                list.add(temp);
+//                temp = new lookuptable("nz_woody_lookup" + ":" + "0", "Undefined", Integer.parseInt("0"));
+//                list.add(temp);
+//                temp = new lookuptable("nz_woody_lookup" + ":" + "1", "Water", Integer.parseInt("0"));
+//                list.add(temp);
+//                temp = new lookuptable("nz_woody_lookup" + ":" + "2", "Bare Ground", Integer.parseInt("10"));
+//                list.add(temp);
+//                temp = new lookuptable("nz_woody_lookup" + ":" + "3", "Woody", Integer.parseInt("1"));
+//                list.add(temp);
+//                temp = new lookuptable("nz_woody_lookup" + ":" + "4", "Herbaceous", Integer.parseInt("10"));
+//                list.add(temp);
+//                temp = new lookuptable("nz_woody_lookup" + ":" + "6", "Primarily Bare", Integer.parseInt("10"));
+//                list.add(temp);
+//                temp = new lookuptable("nz_woody_lookup" + ":" + "7", "Snow", Integer.parseInt("10"));
+//                list.add(temp);
 	}
 }
