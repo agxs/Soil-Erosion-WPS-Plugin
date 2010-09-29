@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package tikouka.nl.wps.handler;
 
 import java.io.CharArrayWriter;
@@ -14,10 +9,11 @@ import org.xml.sax.ext.DefaultHandler2;
 /**
  *
  * @author niels
+ * derived from a SAXParser example
  */
-public abstract class XMLContentHandler extends DefaultHandler2{
-
-    /* serves as context container while building a data structure top down */
+public abstract class XMLContentHandler extends DefaultHandler2
+{
+	/* serves as context container while building a data structure top down */
 	private Stack valueStack = new Stack();
 
 	private boolean readingCDATA = false;
@@ -67,21 +63,21 @@ public abstract class XMLContentHandler extends DefaultHandler2{
 
 	public void endElement(String uri, String localName, String name) throws SAXException
 	{
-//		try {
-//			/* let the element store the text */
-//			processText(peek(), text.toString());
-//			text.reset();
-//
-//			/* pop the element from the stack */
-//			pop();
-//
-//		} catch (Exception ex) {
-//			ex.printStackTrace();
-//			throw new SAXException("", ex);
-//		}
+		try {
+			/* let the element store the text */
+			processText(peek(), text.toString());
+			text.reset();
+
+			/* pop the element from the stack */
+			pop();
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			throw new SAXException("", ex);
+		}
 	}
 
-	//abstract protected void processText(Object element, String str) throws Exception;
+	abstract protected void processText(Object element, String str) throws Exception;
 
 	public void endCDATA() throws SAXException
 	{

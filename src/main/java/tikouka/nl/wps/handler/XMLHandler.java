@@ -1,3 +1,4 @@
+
 package tikouka.nl.wps.handler;
 
 
@@ -5,9 +6,11 @@ package tikouka.nl.wps.handler;
 import org.xml.sax.Attributes;
 import tikouka.nl.wps.algorithm.util.RasterTable;
 import tikouka.nl.wps.algorithm.util.Table;
-
-//import org.xml.sax.helpers.DefaultHandler;
-
+/**
+ *
+ * @author niels
+ * derived from a SAXParser example
+ */
 public class XMLHandler extends XMLContentHandler {
 
      private RasterTable rastertable;
