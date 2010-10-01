@@ -107,7 +107,7 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
 			throw new RuntimeException("Error while allocating input parameters 'landuse'");
 		}
         GridCoverage2D nz_r2 = ((GTRasterDataBinding) inputData.get("nz_r2").get(0)).getPayload();
-         // ############################################################
+        // ############################################################
         //  PARSE THE LOOKUPTABLE
         // ############################################################
         List<Table> woodylutList = getLookupTableData(nz_woody_lookup);

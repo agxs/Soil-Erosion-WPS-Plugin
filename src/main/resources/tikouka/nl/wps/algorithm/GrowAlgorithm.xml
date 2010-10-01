@@ -36,6 +36,25 @@ http://geoserver.itc.nl:8080/wps/schemas/wps/1.0.0/wpsDescribeProcess_response.x
 				</Supported>
 				</ComplexData>
 			</Input>
+                        <Input minOccurs="1" maxOccurs="1">
+				<ows:Identifier>nz_woody_lookup</ows:Identifier>
+				<ows:Title>woody Lookup Table</ows:Title>
+				<ows:Abstract>woody Lookup Table</ows:Abstract>
+				<ComplexData>
+					<Default>
+						<Format>
+							<MimeType>text/XML</MimeType>
+							<Schema>http://tikouka/schemas/RasterTable.xsd</Schema>
+						</Format>
+					</Default>
+					<Supported>
+						<Format>
+							<MimeType>text/XML</MimeType>
+							<Schema>http://tikouka/schemas/RasterTable.xsd</Schema>
+						</Format>
+					</Supported>
+				</ComplexData>
+			</Input>
 		</DataInputs>
 		<ProcessOutputs>
 			<Output>
