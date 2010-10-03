@@ -7,9 +7,7 @@ package tikouka.nl.wps.algorithm;
 
 import com.vividsolutions.jts.geom.Geometry;
 import java.awt.Dimension;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
-import java.awt.image.AffineTransformOp;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.ByteArrayInputStream;
@@ -30,7 +28,6 @@ import org.geotools.coverage.processing.AbstractProcessor;
 import org.geotools.coverage.processing.DefaultProcessor;
 import org.geotools.feature.DefaultFeatureCollections;
 import org.geotools.feature.FeatureCollection;
-import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.ProcessException;
@@ -79,6 +76,9 @@ public class GrowAlgorithm extends AbstractObservableAlgorithm
     public Class getInputDataType(String id) {
         if(id.equalsIgnoreCase("nz_woody")){
 				return GTRasterDataBinding.class;
+        }
+        else if (id.equalsIgnoreCase("nz_woody_lookup")){
+            return LiteralStringBinding.class;
         }
         else if (id.equalsIgnoreCase("g")){
             return LiteralDoubleBinding.class;
@@ -154,18 +154,20 @@ public class GrowAlgorithm extends AbstractObservableAlgorithm
         outsideValues.add(Double.parseDouble("0"));
         outsideValues.add(Double.parseDouble("10"));
 
-        FeatureCollection fc = null;
+        //FeatureCollection fc = null;
+        FeatureCollection<SimpleFeatureType, SimpleFeature> fc = null;
+        Dimension dim = new Dimension(x_x, y_y);
+        ReferencedEnvelope refEnv = new ReferencedEnvelope(res_env);
+
         try{
-            fc = RasterToVectorProcess.process(nz_woody, 0,res_env, outsideValues , null);
+            fc = RasterToVectorProcess.process(nz_woody,0, res_env, outsideValues , null);
         }catch(ProcessException pe){
             pe.printStackTrace();
         }
 
         FeatureCollection buffer = runBuffer(fc, grow_factor[0]);
 
-        Dimension dim = new Dimension(x_x, y_y);
-        ReferencedEnvelope refEnv = new ReferencedEnvelope(res_env);
-
+        
         GridCoverageFactory coverageFactory = new GridCoverageFactory();
         GridCoverage2D coverage = coverageFactory.create("output", raster,res_env);
 
