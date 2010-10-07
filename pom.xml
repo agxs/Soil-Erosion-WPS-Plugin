@@ -77,6 +77,11 @@
             <artifactId>dom4j</artifactId>
             <version>1.6</version>
 	</dependency>-->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>52n-wps-sextante</artifactId>
+            <version>${project.version}</version>
+        </dependency>
   </dependencies>
 </project>
 

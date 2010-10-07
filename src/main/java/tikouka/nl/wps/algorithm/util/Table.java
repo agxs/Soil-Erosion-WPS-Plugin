@@ -32,4 +32,8 @@ public class Table {
         return value;
     }
 
+     public int getIntValue() {
+        return value;
+    }
+
 }
