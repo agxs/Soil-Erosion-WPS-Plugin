@@ -4,16 +4,16 @@ http://geoserver.itc.nl:8080/wps/schemas/wps/1.0.0/wpsDescribeProcess_response.x
 	<ProcessDescription wps:processVersion="2" storeSupported="true" statusSupported="false">
 		<ows:Identifier>tikouka.nl.wps.algorithm.ReclassAlgorithm</ows:Identifier>
 		<ows:Title>Reclass Algorithm</ows:Title>
-		<ows:Abstract>Grow Algorithm for e-Framework project</ows:Abstract>
-		<ows:Metadata xlink:title="Grow" />
+		<ows:Abstract>Reclass Algorithm for e-Framework project</ows:Abstract>
+		<ows:Metadata xlink:title="Reclass" />
 		<ows:Metadata xlink:title="WPS" />
 		<DataInputs>
 			<Input minOccurs="1" maxOccurs="1">
-				<ows:Identifier>g</ows:Identifier>
+				<ows:Identifier>vtk</ows:Identifier>
 				<ows:Title>vtk</ows:Title>
 				<ows:Abstract>value to keep</ows:Abstract>
 				<LiteralData>
-					<ows:DataType ows:reference="xs:integer"></ows:DataType>
+					<ows:DataType ows:reference="xs:int"></ows:DataType>
                                         <ows:AllowedValues>
 						<ows:Value></ows:Value>
 					</ows:AllowedValues>
@@ -34,25 +34,6 @@ http://geoserver.itc.nl:8080/wps/schemas/wps/1.0.0/wpsDescribeProcess_response.x
 						<MimeType>image/tiff</MimeType>
                                         </Format>
 				</Supported>
-				</ComplexData>
-			</Input>
-                        <Input minOccurs="1" maxOccurs="1">
-				<ows:Identifier>nz_woody_lookup</ows:Identifier>
-				<ows:Title>woody Lookup Table</ows:Title>
-				<ows:Abstract>woody Lookup Table</ows:Abstract>
-				<ComplexData>
-					<Default>
-						<Format>
-							<MimeType>text/XML</MimeType>
-							<Schema>http://tikouka/schemas/RasterTable.xsd</Schema>
-						</Format>
-					</Default>
-					<Supported>
-						<Format>
-							<MimeType>text/XML</MimeType>
-							<Schema>http://tikouka/schemas/RasterTable.xsd</Schema>
-						</Format>
-					</Supported>
 				</ComplexData>
 			</Input>
 		</DataInputs>
