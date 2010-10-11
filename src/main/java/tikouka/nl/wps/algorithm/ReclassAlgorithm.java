@@ -62,10 +62,7 @@ public class ReclassAlgorithm extends AbstractObservableAlgorithm
     public Class getInputDataType(String id) {
         if(id.equalsIgnoreCase("nz_woody")){
 				return GTRasterDataBinding.class;
-        }
-        else if (id.equalsIgnoreCase("nz_woody_lookup")){
-            return LiteralStringBinding.class;
-        }
+        }   
         else if (id.equalsIgnoreCase("vtk")){
             return LiteralIntBinding.class;
         }
@@ -84,20 +81,10 @@ public class ReclassAlgorithm extends AbstractObservableAlgorithm
 		}
         GridCoverage2D nz_woody = ((GTRasterDataBinding) inputData.get("nz_woody").get(0)).getPayload();
 
-        if(inputData==null || !inputData.containsKey("nz_woody_lookup")){
-			throw new RuntimeException("Error while allocating input parameters");
-		}
-        List<IData> nz_woody_lookup = inputData.get("nz_woody_lookup");
-
         if(inputData==null || !inputData.containsKey("vtk")){
 			throw new RuntimeException("Error while allocating input parameters");
 		}
         int valuetokeep= ((LiteralIntBinding) inputData.get("vtk").get(0)).getPayload();
-
-        // ############################################################
-        //  PARSE THE LOOKUPTABLE
-        // ############################################################
-        List<Table> woodylutList = getLookupTableData(nz_woody_lookup);
 
         // ############################################################
         //  RUN THE MODEL
@@ -137,21 +124,20 @@ public class ReclassAlgorithm extends AbstractObservableAlgorithm
          * reclass reclassifies the input raster so that the output can be buffered.
          */
 
+        //int woodyvallookup = woodylutList.get(valuetokeep).getIntValue();
+
          try{
             for (int y=minY + (y_y/2) ;y < maxY;y+= y_y){
                 for (int x = minX + (x_x/2) ;x < maxX;x+= x_x){
                     int[] woodyval= new int[1];
                     double[] out = new double[1];
 
-
                     Point2D pt = new DirectPosition2D(x, y);
 
                     nz_woody.evaluate(pt, woodyval);
 
-                    int woodyvallookup = woodylutList.get(woodyval[0]).getIntValue();
-
-                    if (woodyval[0] == woodyvallookup){
-                        out[0] = woodyvallookup;
+                    if (woodyval[0] == valuetokeep){
+                        out[0] = valuetokeep;
                     }else{
                         out[0] = 0;
                     }
@@ -187,30 +173,5 @@ public class ReclassAlgorithm extends AbstractObservableAlgorithm
         }
         return resulthash;
     }
-
-    private List<Table> getLookupTableData(List<IData> lookup)
-	{
-                XMLHandler handler = new XMLHandler();
-		try
-		{
-                    SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
-
-                    parser.setProperty("http://xml.org/sax/properties/lexical-handler", handler);
-                    parser.parse(new ByteArrayInputStream(((LiteralStringBinding) lookup.get(0)).getPayload().getBytes()), handler);
-
-                }catch(SAXException se){
-                    se.printStackTrace();
-                    throw new RuntimeException(se);
-                }catch(ParserConfigurationException pe){
-                    pe.printStackTrace();
-                    throw new RuntimeException(pe);
-                }catch(IOException ioe){
-                    ioe.printStackTrace();
-                    throw new RuntimeException(ioe);
-                }
-
-                return handler.getRasterRable().getTable();
-
-	}
 
 }
