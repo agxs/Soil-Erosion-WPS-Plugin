@@ -82,6 +82,7 @@
             <artifactId>52n-wps-sextante</artifactId>
             <version>${project.version}</version>
         </dependency>
+         
   </dependencies>
 </project>
 

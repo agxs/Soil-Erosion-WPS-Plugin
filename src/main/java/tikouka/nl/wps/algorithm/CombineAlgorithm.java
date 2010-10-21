@@ -24,6 +24,7 @@ import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.Envelope2D;
 import org.n52.wps.io.data.IData;
 import org.n52.wps.io.data.binding.complex.GTRasterDataBinding;
+import org.n52.wps.io.data.binding.literal.LiteralStringBinding;
 import org.n52.wps.server.AbstractObservableAlgorithm;
 import org.opengis.parameter.ParameterValueGroup;
 
@@ -56,6 +57,9 @@ public class CombineAlgorithm extends AbstractObservableAlgorithm
         if(id.equalsIgnoreCase("nz_woody")||id.equalsIgnoreCase("reclassed")){
 				return GTRasterDataBinding.class;
         }
+         else if (id.equalsIgnoreCase("nonreclasseablevalue")||id.equalsIgnoreCase("reclassvalue")){
+            return LiteralStringBinding.class;
+        }
 	throw new RuntimeException("Could not find datatype for id " + id);
     }
 
@@ -72,13 +76,25 @@ public class CombineAlgorithm extends AbstractObservableAlgorithm
         GridCoverage2D nz_woody = ((GTRasterDataBinding) inputData.get("nz_woody").get(0)).getPayload();
 
         if(inputData==null || !inputData.containsKey("reclassed")){
-			throw new RuntimeException("Error while allocating input parameters 'nz_woody'");
+			throw new RuntimeException("Error while allocating input parameters 'reclassed'");
 		}
         GridCoverage2D reclassed = ((GTRasterDataBinding) inputData.get("reclassed").get(0)).getPayload();
         
+        if(inputData==null || !inputData.containsKey("nonreclasseablevalue")){
+			throw new RuntimeException("Error while allocating input parameters 'nonreclasseablevalue'");
+		}
+        String nonreclasseablevalue = ((LiteralStringBinding)inputData.get("nonreclasseablevalue").get(0)).getPayload();
+
+        if(inputData==null || !inputData.containsKey("reclassvalue")){
+			throw new RuntimeException("Error while allocating input parameters 'reclassvalue'");
+		}
+        String reclassvalue = ((LiteralStringBinding)inputData.get("reclassvalue").get(0)).getPayload();
+
         // ############################################################
         //  RUN THE MODEL
         // ############################################################
+
+        String[] nrv = nonreclasseablevalue.split(",");
 
          Envelope2D res_env = new Envelope2D(nz_woody.getEnvelope2D());
                 Rectangle2D.intersect(nz_woody.getEnvelope2D(), reclassed.getEnvelope2D(), res_env);
@@ -136,17 +152,31 @@ public class CombineAlgorithm extends AbstractObservableAlgorithm
                     nz_woody_cr.evaluate(pt, woodyval);
                     reclassed_cr.evaluate(pt, reclassedval);
 
-                   if(reclassedval[0] == 3 ){
-                       if(woodyval[0]== 7){
-                           out[0] = 7;
-                       }else if(woodyval[0] == 0){
-                           out[0] = 0;
-                       }else{
-                           out[0]=3;
-                       }
-                   }else{
+
+                    if(reclassedval[0] == 1){
+                        for (int l=0; l< nrv.length;l++){
+                            if(reclassedval[0] == Integer.parseInt(nrv[l])){
+                                out[0] = woodyval[0];
+                            }else{
+                                out[0] = Integer.parseInt(reclassvalue);
+                            }
+
+                        }
+                    }else{
                         out[0]=woodyval[0];
-                   }
+                    }
+
+//                   if(reclassedval[0] == 1 ){
+//                       if(woodyval[0]== 7){
+//                           out[0] = 7;
+//                       }else if(woodyval[0] == 0){
+//                           out[0] = 0;
+//                       }else{
+//                           out[0]=3;
+//                       }
+//                   }else{
+//                        out[0]=woodyval[0];
+//                   }
                     
                     raster.setPixel( (x - minX) / x_x, (y - minY) / y_y,out);
                 }

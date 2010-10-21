@@ -42,6 +42,28 @@ http://geoserver.itc.nl:8080/wps/schemas/wps/1.0.0/wpsDescribeProcess_response.x
 				</Supported>
 				</ComplexData>
 			</Input>
+                        <Input minOccurs="1" maxOccurs="1">
+				<ows:Identifier>nonreclasseablevalue</ows:Identifier>
+				<ows:Title>nonreclasseablevalue</ows:Title>
+				<ows:Abstract>the nz_woody values that cannot be replaced by woody</ows:Abstract>
+				<LiteralData>
+					<ows:DataType ows:reference="xs:string"></ows:DataType>
+                                        <ows:AllowedValues>
+						<ows:Value></ows:Value>
+					</ows:AllowedValues>
+				</LiteralData>
+			</Input>
+                        <Input minOccurs="1" maxOccurs="1">
+				<ows:Identifier>reclassvalue</ows:Identifier>
+				<ows:Title>reclassvalue</ows:Title>
+				<ows:Abstract>the nz_woody values that represents woody</ows:Abstract>
+				<LiteralData>
+					<ows:DataType ows:reference="xs:string"></ows:DataType>
+                                        <ows:AllowedValues>
+						<ows:Value></ows:Value>
+					</ows:AllowedValues>
+				</LiteralData>
+			</Input>
 		</DataInputs>
 		<ProcessOutputs>
 			<Output>
