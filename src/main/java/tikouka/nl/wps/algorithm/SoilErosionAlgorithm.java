@@ -17,9 +17,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.processing.AbstractProcessor;
@@ -33,6 +35,7 @@ import org.n52.wps.io.data.binding.literal.LiteralStringBinding;
 import org.n52.wps.server.AbstractObservableAlgorithm;
 import org.opengis.parameter.ParameterValueGroup;
 import org.xml.sax.SAXException;
+
 import tikouka.nl.wps.algorithm.util.Table;
 import tikouka.nl.wps.handler.XMLHandler;
 
@@ -110,7 +113,7 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
         // ############################################################
         //  PARSE THE LOOKUPTABLE
         // ############################################################
-        List<Table> woodylutList = getLookupTableData(nz_woody_lookup);
+        Map<Integer,Double> woodylutList = getLookupTableData(nz_woody_lookup);
       
         // ############################################################
         //  RUN THE MODEL
@@ -142,15 +145,15 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
         param2.parameter("constants").setValue(rain_factor);
         GridCoverage2D nz_r2_cr2 = (GridCoverage2D) processor.doOperation(param2);
 
-        int minX = (int)res_env.getMinX();
-        int maxX = (int)res_env.getMaxX();
-        int width = (int)res_env.getWidth()/100;
-        int x_x =  (int)((maxX - minX)/(width));
+        int minX = (int)res_env.getMinX(); // min x extent in CRS
+        int maxX = (int)res_env.getMaxX(); // max y extent in CRS
+        int width = (int)Math.ceil( res_env.getWidth()/100.0 ); // width of image in pixels
+        int x_x =  100;//(int)((maxX - minX)/(width)); // width of pixel in CRS
       
         int minY = (int)res_env.getMinY();
         int maxY = (int)res_env.getMaxY();
-        int height = (int)res_env.getHeight()/100;
-        int y_y =  (int)((maxY - minY)/(height));
+        int height = (int)Math.ceil( res_env.getHeight()/100.0 );
+        int y_y =  100;//(int)((maxY - minY)/(height));
       
         BufferedImage image = new BufferedImage((int)width,(int)height, BufferedImage.TYPE_BYTE_GRAY);
         //BufferedImage image = new BufferedImage((int)width,(int)height, BufferedImage.TYPE_3BYTE_BGR);
@@ -193,7 +196,7 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
                     nz_r2_cr2.evaluate(pt, r2_rval);
                     nz_ak2_cr.evaluate(pt, ak2_rval);
                     
-                    double woodyvallookup = woodylutList.get(woodyval[0]).getValue();
+                    double woodyvallookup = woodylutList.get(woodyval[0]);
 
                     out[0] = woodyvallookup * r2_rval[0] * ak2_rval[0];
 
@@ -230,7 +233,7 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
         return resulthash;
     }
 
-    private List<Table> getLookupTableData(List<IData> lookup)
+    private Map<Integer,Double> getLookupTableData(List<IData> lookup)
 	{
                 XMLHandler handler = new XMLHandler();
 		try
@@ -251,7 +254,12 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
                     throw new RuntimeException(ioe);
                 }
 
-                return handler.getRasterRable().getTable();
-
+                List<Table> rasterList = handler.getRasterRable().getTable();
+                Map<Integer,Double> rasterMap = new HashMap<Integer,Double>();
+                for ( Table t: rasterList ) {
+                  rasterMap.put( Integer.parseInt( t.getId() ), (double)t.getIntValue() );
+                }
+                
+                return rasterMap;
 	}
 }
