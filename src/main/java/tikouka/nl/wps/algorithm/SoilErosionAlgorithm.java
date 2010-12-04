@@ -145,17 +145,21 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
         param2.parameter("constants").setValue(rain_factor);
         GridCoverage2D nz_r2_cr2 = (GridCoverage2D) processor.doOperation(param2);
 
-        int minX = (int)res_env.getMinX(); // min x extent in CRS
-        int maxX = (int)res_env.getMaxX(); // max y extent in CRS
-        int width = (int)Math.ceil( res_env.getWidth()/100.0 ); // width of image in pixels
-        int x_x =  100;//(int)((maxX - minX)/(width)); // width of pixel in CRS
+        // Choose width per pixel basedon original image?
+        // Use a supplied parameter?
+        // What about interpolation algorithm?
+        // Nearest neighbour by default by the looks of it
+        double minX = res_env.getMinX(); // min x extent in CRS
+        double maxX = res_env.getMaxX(); // max y extent in CRS
+        int width = (int)nz_woody.getGridGeometry().getGridRange2D().getWidth(); // width in pixels
+        double x_x = (maxX - minX)/width; // width of pixel in CRS
       
-        int minY = (int)res_env.getMinY();
-        int maxY = (int)res_env.getMaxY();
-        int height = (int)Math.ceil( res_env.getHeight()/100.0 );
-        int y_y =  100;//(int)((maxY - minY)/(height));
+        double minY = res_env.getMinY();
+        double maxY = res_env.getMaxY();
+        int height = (int)nz_woody.getGridGeometry().getGridRange2D().getHeight();
+        double y_y = (maxY - minY)/height;
       
-        BufferedImage image = new BufferedImage((int)width,(int)height, BufferedImage.TYPE_BYTE_GRAY);
+        BufferedImage image = new BufferedImage(width,height, BufferedImage.TYPE_BYTE_GRAY);
         //BufferedImage image = new BufferedImage((int)width,(int)height, BufferedImage.TYPE_3BYTE_BGR);
         WritableRaster raster = image.getRaster();
         //WritableRaster raster = RasterFactory.createBandedRaster(DataBuffer.TYPE_FLOAT, (int)width, (int)height, 1, null);
@@ -182,15 +186,18 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
         //GeometryFactory geomFac = new GeometryFactory();
 
         try{
-            for (int y=minY + (y_y/2) ;y < maxY;y+= y_y){
-                for (int x = minX + (x_x/2) ;x < maxX;x+= x_x){
+            //for (int y=minY + (y_y/2) ;y < maxY;y+= y_y){
+            for ( int y = 0; y < height; y++ ) {
+                //for (int x = minX + (x_x/2) ;x < maxX;x+= x_x){
+                for ( int x = 0; x < width; x++ ) {
                     int[] woodyval= new int[1];
                     double[] r2_rval = new double[1];
                     double[] ak2_rval = new double[1];
                     double[] out = new double[1];
 
-
-                    Point2D pt = new DirectPosition2D(x, y);
+                    // Translates pixel space to world coordinates
+                    Point2D pt = new DirectPosition2D( (minX + x_x/2) + x * x_x,
+                                                       (minY + y_y/2) + y * y_y );
                     
                     nz_woody_cr.evaluate(pt, woodyval);
                     nz_r2_cr2.evaluate(pt, r2_rval);
@@ -200,7 +207,8 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm
 
                     out[0] = woodyvallookup * r2_rval[0] * ak2_rval[0];
 
-                    raster.setPixel( (x - minX) / x_x, (y - minY) / y_y,out);
+                    //raster.setPixel( (x - minX) / x_x, (y - minY) / y_y,out);
+                    raster.setPixel( x, y, out );
                 }
             }
         }catch(NullPointerException npe){
