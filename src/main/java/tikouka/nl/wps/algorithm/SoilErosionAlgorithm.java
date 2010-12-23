@@ -5,12 +5,8 @@
 
 package tikouka.nl.wps.algorithm;
 
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.AffineTransformOp;
-import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,7 +29,6 @@ import org.n52.wps.io.data.binding.complex.GTRasterDataBinding;
 import org.n52.wps.io.data.binding.literal.LiteralDoubleBinding;
 import org.n52.wps.io.data.binding.literal.LiteralStringBinding;
 import org.n52.wps.server.AbstractObservableAlgorithm;
-import org.opengis.parameter.ParameterValueGroup;
 import org.xml.sax.SAXException;
 
 import tikouka.nl.wps.algorithm.util.Table;
@@ -112,7 +107,7 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm {
     // ############################################################
     // PARSE THE LOOKUPTABLE
     // ############################################################
-    Map<Integer, Double> woodylutList = getLookupTableData( nz_woody_lookup );
+    Map<Integer, Integer> woodylutList = getLookupTableData( nz_woody_lookup );
 
     // ############################################################
     // RUN THE MODEL
@@ -124,25 +119,6 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm {
     Rectangle2D.intersect( res_env, nz_r2.getEnvelope2D(), res_env );
 
     res_env.setRect( (int)res_env.x, (int)res_env.y, (int)res_env.width, (int)res_env.height );
-
-    ParameterValueGroup param = processor.getOperation( "CoverageCrop" ).getParameters();
-    param.parameter( "Source" ).setValue( nz_woody );
-    param.parameter( "envelope" ).setValue( res_env );
-    GridCoverage2D nz_woody_cr = (GridCoverage2D)processor.doOperation( param );
-
-    param.parameter( "Source" ).setValue( nz_ak2 );
-    param.parameter( "envelope" ).setValue( res_env );
-    GridCoverage2D nz_ak2_cr = (GridCoverage2D)processor.doOperation( param );
-
-    param.parameter( "Source" ).setValue( nz_r2 );
-    param.parameter( "envelope" ).setValue( res_env );
-    GridCoverage2D nz_r2_cr = (GridCoverage2D)processor.doOperation( param );
-
-    // first step is to multiply the r2 coverage with the rain factor
-    ParameterValueGroup param2 = processor.getOperation( "MultiplyConst" ).getParameters();
-    param2.parameter( "Source" ).setValue( nz_r2_cr );
-    param2.parameter( "constants" ).setValue( rain_factor );
-    GridCoverage2D nz_r2_cr2 = (GridCoverage2D)processor.doOperation( param2 );
 
     // Choose width per pixel basedon original image?
     // Use a supplied parameter?
@@ -158,14 +134,7 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm {
     int height = (int)nz_woody.getGridGeometry().getGridRange2D().getHeight();
     double y_y = (maxY - minY) / height;
 
-    BufferedImage image = new BufferedImage( width, height, BufferedImage.TYPE_BYTE_GRAY );
-    // BufferedImage image = new BufferedImage((int)width,(int)height,
-    // BufferedImage.TYPE_3BYTE_BGR);
-    WritableRaster raster = image.getRaster();
-    // WritableRaster raster = RasterFactory.createBandedRaster(DataBuffer.TYPE_FLOAT, (int)width,
-    // (int)height, 1, null);
-
-    // float[][] raster = new float[height][width];
+    float[][] raster = new float[height][width];
 
     /*
      * Algorithm: a is the geology & slope information C is the land use, either woody/forest or
@@ -185,9 +154,7 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm {
     // GeometryFactory geomFac = new GeometryFactory();
 
     try {
-      // for (int y=minY + (y_y/2) ;y < maxY;y+= y_y){
       for ( int y = 0; y < height; y++ ) {
-        // for (int x = minX + (x_x/2) ;x < maxX;x+= x_x){
         for ( int x = 0; x < width; x++ ) {
           int[] woodyval = new int[1];
           double[] r2_rval = new double[1];
@@ -197,16 +164,22 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm {
           // Translates pixel space to world coordinates
           Point2D pt = new DirectPosition2D( (minX + x_x / 2) + x * x_x, (minY + y_y / 2) + y * y_y );
 
-          nz_woody_cr.evaluate( pt, woodyval );
-          nz_r2_cr2.evaluate( pt, r2_rval );
-          nz_ak2_cr.evaluate( pt, ak2_rval );
+          nz_woody.evaluate( pt, woodyval );
+          nz_r2.evaluate( pt, r2_rval );
+          nz_ak2.evaluate( pt, ak2_rval );
 
-          double woodyvallookup = woodylutList.get( woodyval[0] );
+          int woodyvallookup = woodylutList.get( woodyval[0] );
 
-          out[0] = woodyvallookup * r2_rval[0] * ak2_rval[0];
+          out[0] = woodyvallookup * Math.pow( r2_rval[0], rain_factor[0] ) * ak2_rval[0];
 
-          // raster.setPixel( (x - minX) / x_x, (y - minY) / y_y,out);
-          raster.setPixel( x, y, out );
+          // Geotools assumes y=0 is the bottom and not the top, unless screen
+          // coordinates.
+          raster[height-y-1][x] = (float)out[0];
+          // Infinite values cause the exporter to break. Ideally NaN would be
+          // used instead but Mapserver doesn't like that.
+          if ( Float.isInfinite( raster[height-y-1][x] ) ) {
+            raster[height-y-1][x] = 0.0f;
+          }
         }
       }
     } catch ( NullPointerException npe ) {
@@ -216,12 +189,6 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm {
     } catch ( Exception e ) {
       e.printStackTrace();
     }
-
-    // Use a transformation to flip it back before writing the coverage
-    AffineTransform at = AffineTransform.getScaleInstance( 1, -1 );
-    at.translate( 0, -raster.getHeight() );
-    AffineTransformOp op = new AffineTransformOp( at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR );
-    raster = op.filter( raster, null );
 
     GridCoverageFactory coverageFactory = new GridCoverageFactory();
 
@@ -239,7 +206,7 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm {
     return resulthash;
   }
 
-  private Map<Integer, Double> getLookupTableData( List<IData> lookup ) {
+  private Map<Integer, Integer> getLookupTableData( List<IData> lookup ) {
     XMLHandler handler = new XMLHandler();
     try {
       SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
@@ -260,9 +227,9 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm {
     }
 
     List<Table> rasterList = handler.getRasterRable().getTable();
-    Map<Integer, Double> rasterMap = new HashMap<Integer, Double>();
+    Map<Integer, Integer> rasterMap = new HashMap<Integer, Integer>();
     for ( Table t : rasterList ) {
-      rasterMap.put( Integer.parseInt( t.getId() ), (double)t.getIntValue() );
+      rasterMap.put( Integer.parseInt( t.getId() ), t.getIntValue() );
     }
 
     return rasterMap;
