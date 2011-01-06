@@ -149,6 +149,9 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm {
      * can be +ve or -ve, which would indicate a contraction in forest area.
      * 
      * I think SE is in t/km^2/yr/mm^2
+     * 
+     * Output is in millions of t/km^2/yr/mm^2, ie, a pixel of 1 means
+     * 1E6 t/km^2/yr/mm^2
      */
 
     // GeometryFactory geomFac = new GeometryFactory();
@@ -177,8 +180,12 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm {
           raster[height-y-1][x] = (float)out[0];
           // Infinite values cause the exporter to break. Ideally NaN would be
           // used instead but Mapserver doesn't like that.
-          if ( Float.isInfinite( raster[height-y-1][x] ) ) {
+          if ( Float.isInfinite( raster[height-y-1][x] ) ||
+               Float.isNaN( raster[height-y-1][x] ) ) {
             raster[height-y-1][x] = 0.0f;
+          }
+          else {
+            raster[height-y-1][x] /= 1000000.0f; // convert units to millions for easier viewing
           }
         }
       }
