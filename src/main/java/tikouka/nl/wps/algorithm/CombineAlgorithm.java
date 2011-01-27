@@ -110,15 +110,15 @@ public class CombineAlgorithm extends AbstractObservableAlgorithm
         param.parameter("envelope").setValue(res_env);
         GridCoverage2D reclassed_cr = (GridCoverage2D) processor.doOperation(param);
 
-        int minX = (int)res_env.getMinX();
-        int maxX = (int)res_env.getMaxX();
-        int width = (int)res_env.getWidth()/100;
-        int x_x =  (int)((maxX - minX)/(width));
+        double minX = res_env.getMinX(); // min x extent in CRS
+        double maxX = res_env.getMaxX(); // max y extent in CRS
+        int width = (int)nz_woody.getGridGeometry().getGridRange2D().getWidth(); // width in pixels
+        double x_x = (maxX - minX) / width; // width of pixel in CRS
 
-        int minY = (int)res_env.getMinY();
-        int maxY = (int)res_env.getMaxY();
-        int height = (int)res_env.getHeight()/100;
-        int y_y =  (int)((maxY - minY)/(height));
+        double minY = res_env.getMinY();
+        double maxY = res_env.getMaxY();
+        int height = (int)nz_woody.getGridGeometry().getGridRange2D().getHeight();
+        double y_y = (maxY - minY) / height;
 
         BufferedImage image = new BufferedImage((int)width,(int)height, BufferedImage.TYPE_BYTE_GRAY);
         WritableRaster raster = image.getRaster();
@@ -141,44 +141,32 @@ public class CombineAlgorithm extends AbstractObservableAlgorithm
          */
 
         try{
-            for (int y=minY + (y_y/2) ;y < maxY;y+= y_y){
-                for (int x = minX + (x_x/2) ;x < maxX;x+= x_x){
+            for ( int y = 0; y < height; y++ ) {
+                for ( int x = 0; x < width; x++ ) {
                     int[] woodyval= new int[1];
                     int[] reclassedval= new int[1];
                     double[] out = new double[1];
 
-                    Point2D pt = new DirectPosition2D(x, y);
+                    Point2D pt = new DirectPosition2D((minX + x_x / 2) + x * x_x, (minY + y_y / 2) + y * y_y);
 
                     nz_woody_cr.evaluate(pt, woodyval);
                     reclassed_cr.evaluate(pt, reclassedval);
 
 
-                    if(reclassedval[0] == 1){
+                    if(reclassedval[0] == Integer.parseInt(reclassvalue)){
                         for (int l=0; l< nrv.length;l++){
-                            if(reclassedval[0] == Integer.parseInt(nrv[l])){
+                            if(woodyval[0] == Integer.parseInt(nrv[l])){
                                 out[0] = woodyval[0];
+                                break;
                             }else{
                                 out[0] = Integer.parseInt(reclassvalue);
                             }
-
                         }
                     }else{
                         out[0]=woodyval[0];
                     }
 
-//                   if(reclassedval[0] == 1 ){
-//                       if(woodyval[0]== 7){
-//                           out[0] = 7;
-//                       }else if(woodyval[0] == 0){
-//                           out[0] = 0;
-//                       }else{
-//                           out[0]=3;
-//                       }
-//                   }else{
-//                        out[0]=woodyval[0];
-//                   }
-                    
-                    raster.setPixel( (x - minX) / x_x, (y - minY) / y_y,out);
+                    raster.setPixel( x, height-y-1, out);
                 }
             }
         }catch(NullPointerException npe){
@@ -188,12 +176,6 @@ public class CombineAlgorithm extends AbstractObservableAlgorithm
         }catch(Exception e){
             e.printStackTrace();
         }
-
-        //Use a transformation to flip it back before writing the coverage
-        AffineTransform at = AffineTransform.getScaleInstance(1, -1);
-        at.translate(0, -raster.getHeight());
-        AffineTransformOp op = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-        raster = op.filter(raster,null);
 
         GridCoverageFactory coverageFactory = new GridCoverageFactory();
 
