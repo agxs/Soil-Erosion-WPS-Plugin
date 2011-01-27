@@ -5,17 +5,16 @@
 
 package tikouka.nl.wps.algorithm;
 
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
 import java.awt.image.WritableRaster;
-import java.lang.String;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.processing.AbstractProcessor;
@@ -27,6 +26,8 @@ import org.n52.wps.io.data.binding.complex.GTRasterDataBinding;
 import org.n52.wps.io.data.binding.literal.LiteralStringBinding;
 import org.n52.wps.server.AbstractObservableAlgorithm;
 import org.opengis.parameter.ParameterValueGroup;
+
+import com.sun.media.jai.codecimpl.util.RasterFactory;
 
 /**
  *
@@ -120,8 +121,7 @@ public class CombineAlgorithm extends AbstractObservableAlgorithm
         int height = (int)nz_woody.getGridGeometry().getGridRange2D().getHeight();
         double y_y = (maxY - minY) / height;
 
-        BufferedImage image = new BufferedImage((int)width,(int)height, BufferedImage.TYPE_BYTE_GRAY);
-        WritableRaster raster = image.getRaster();
+        WritableRaster raster = RasterFactory.createBandedRaster( DataBuffer.TYPE_SHORT, width, height, 1, null );
 
         /* Algorithm:
          * a is the geology & slope information

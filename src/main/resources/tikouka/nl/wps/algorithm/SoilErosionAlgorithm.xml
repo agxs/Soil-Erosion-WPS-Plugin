@@ -20,6 +20,28 @@ http://geoserver.itc.nl:8080/wps/schemas/wps/1.0.0/wpsDescribeProcess_response.x
 					</ows:AllowedValues>
 				</LiteralData>
 			</Input>
+      <Input minOccurs="1" maxOccurs="1">
+        <ows:Identifier>growFactor</ows:Identifier>
+        <ows:Title>growFactor</ows:Title>
+        <ows:Abstract>growFactor</ows:Abstract>
+        <LiteralData>
+          <ows:DataType ows:reference="xs:double"></ows:DataType>
+          <ows:AllowedValues>
+            <ows:Value></ows:Value>
+          </ows:AllowedValues>
+        </LiteralData>
+      </Input>
+      <Input minOccurs="1" maxOccurs="1">
+        <ows:Identifier>streamConnectivity</ows:Identifier>
+        <ows:Title>streamConnectivity</ows:Title>
+        <ows:Abstract>streamConnectivity</ows:Abstract>
+        <LiteralData>
+          <ows:DataType ows:reference="xs:double"></ows:DataType>
+          <ows:AllowedValues>
+            <ows:Value></ows:Value>
+          </ows:AllowedValues>
+        </LiteralData>
+      </Input>
                          <Input minOccurs="1" maxOccurs="1">
 				<ows:Identifier>nz_woody_lookup</ows:Identifier>
 				<ows:Title>woody Lookup Table</ows:Title>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wps:ProcessDescriptions xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0
+http://geoserver.itc.nl:8080/wps/schemas/wps/1.0.0/wpsDescribeProcess_response.xsd" xml:lang="en-US" service="WPS" version="1.0.0">
+	<ProcessDescription wps:processVersion="2" storeSupported="true" statusSupported="false">
+		<ows:Identifier>tikouka.nl.wps.algorithm.GrowFactorFacadeAlgorithm</ows:Identifier>
+		<ows:Title>Hello World</ows:Title>
+		<ows:Abstract>Hello World</ows:Abstract>
+		<ows:Metadata xlink:title="Hello" />
+		<ows:Metadata xlink:title="World" />
+		<ows:Metadata xlink:title="so simple" />
+		<DataInputs>
+			<Input minOccurs="1" maxOccurs="1">
+				<ows:Identifier>growFactor</ows:Identifier>
+				<ows:Title>growFactor</ows:Title>
+				<ows:Abstract>growFactor</ows:Abstract>
+				<LiteralData>
+					<ows:DataType ows:reference="xs:int"></ows:DataType>
+          <ows:AllowedValues>
+						<ows:Value></ows:Value>
+					</ows:AllowedValues>
+				</LiteralData>
+			</Input>
+      <Input minOccurs="1" maxOccurs="1">
+        <ows:Identifier>landuse</ows:Identifier>
+        <ows:Title>woody input layer</ows:Title>
+        <ows:Abstract>woody input layer</ows:Abstract>
+        <ComplexData>
+          <Default>
+            <Format>
+              <MimeType>image/tiff</MimeType>
+            </Format>
+          </Default>
+          <Supported>
+            <Format>
+              <MimeType>image/tiff</MimeType>
+            </Format>
+          </Supported>
+        </ComplexData>
+      </Input>
+		</DataInputs>
+		<ProcessOutputs>
+			<Output>
+				<ows:Identifier>result</ows:Identifier>
+				<ows:Title>result</ows:Title>
+				<ows:Abstract>result</ows:Abstract>
+        <ComplexOutput>
+          <Default>
+            <Format>
+              <MimeType>image/tiff</MimeType>
+            </Format>
+          </Default>
+          <Supported>
+            <Format>
+              <MimeType>image/tiff</MimeType>
+            </Format>
+          </Supported>
+        </ComplexOutput>
+			</Output>
+		</ProcessOutputs>
+	</ProcessDescription>
+</wps:ProcessDescriptions>

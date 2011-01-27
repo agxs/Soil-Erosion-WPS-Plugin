@@ -31,6 +31,7 @@ import org.n52.wps.io.data.binding.literal.LiteralStringBinding;
 import org.n52.wps.server.AbstractObservableAlgorithm;
 import org.xml.sax.SAXException;
 
+import tikouka.nl.wps.algorithm.util.GrowFactorFacade;
 import tikouka.nl.wps.algorithm.util.Table;
 import tikouka.nl.wps.handler.XMLHandler;
 
@@ -68,6 +69,10 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm {
       return LiteralStringBinding.class;
     } else if ( id.equalsIgnoreCase( "rain_factor" ) ) {
       return LiteralDoubleBinding.class;
+    } else if ( id.equalsIgnoreCase( "growFactor" ) ) {
+      return LiteralDoubleBinding.class;
+    } else if ( id.equalsIgnoreCase( "streamConnectivity" ) ) {
+      return LiteralDoubleBinding.class;
     }
     throw new RuntimeException( "Could not find datatype for id " + id );
   }
@@ -79,27 +84,45 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm {
     // ############################################################
     // READ THE INPUT DATA
     // ############################################################
+    
+    // Landcover Lookup Table
     if ( inputData == null || !inputData.containsKey( "nz_woody_lookup" ) ) {
       throw new RuntimeException( "Error while allocating input parameters" );
     }
     List<IData> nz_woody_lookup = inputData.get( "nz_woody_lookup" );
 
+    // Rainfall Exponent
     if ( inputData == null || !inputData.containsKey( "rain_factor" ) ) {
       throw new RuntimeException( "Error while allocating input parameters" );
     }
     double rain_factor[] = new double[1];
     rain_factor[0] = ((LiteralDoubleBinding)inputData.get( "rain_factor" ).get( 0 )).getPayload();
 
+    // Grow Factor
+    if ( inputData == null || !inputData.containsKey( "growFactor" ) ) {
+      throw new RuntimeException( "Error while allocating input parameters" );
+    }
+    double growFactor = ((LiteralDoubleBinding)inputData.get( "growFactor" ).get( 0 )).getPayload();
+    
+    // Stream Connectivity
+    if ( inputData == null || !inputData.containsKey( "growFactor" ) ) {
+      throw new RuntimeException( "Error while allocating input parameters" );
+    }
+    double streamConnectivity = ((LiteralDoubleBinding)inputData.get( "streamConnectivity" ).get( 0 )).getPayload();
+    
+    // Landcover raster
     if ( inputData == null || !inputData.containsKey( "nz_woody" ) ) {
       throw new RuntimeException( "Error while allocating input parameters 'landuse'" );
     }
     GridCoverage2D nz_woody = ((GTRasterDataBinding)inputData.get( "nz_woody" ).get( 0 )).getPayload();
 
+    // Erosion Coefficient Raster
     if ( inputData == null || !inputData.containsKey( "nz_ak2" ) ) {
       throw new RuntimeException( "Error while allocating input parameters 'landuse'" );
     }
     GridCoverage2D nz_ak2 = ((GTRasterDataBinding)inputData.get( "nz_ak2" ).get( 0 )).getPayload();
 
+    // Rainfall Raster
     if ( inputData == null || !inputData.containsKey( "nz_r2" ) ) {
       throw new RuntimeException( "Error while allocating input parameters 'landuse'" );
     }
@@ -153,6 +176,10 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm {
      * Output is in millions of t/km^2/yr/mm^2, ie, a pixel of 1 means
      * 1E6 t/km^2/yr/mm^2
      */
+    
+    // Apply grow factor
+    GrowFactorFacade growFactorFacade = new GrowFactorFacade();
+    nz_woody = growFactorFacade.computeGrowFactor( growFactor, nz_woody );
 
     // GeometryFactory geomFac = new GeometryFactory();
 
@@ -173,7 +200,8 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm {
 
           int woodyvallookup = woodylutList.get( woodyval[0] );
 
-          out[0] = woodyvallookup * Math.pow( r2_rval[0], rain_factor[0] ) * ak2_rval[0];
+          out[0] = woodyvallookup * Math.pow( r2_rval[0], rain_factor[0] ) * 
+                   ak2_rval[0] * streamConnectivity;
 
           // Geotools assumes y=0 is the bottom and not the top, unless screen
           // coordinates.

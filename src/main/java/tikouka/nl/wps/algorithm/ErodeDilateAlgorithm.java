@@ -30,9 +30,9 @@ import es.unex.sextante.outputs.Output;
  * 
  * @author Andrew Seales
  */
-public class GrowFactorTestAlgorithm extends AbstractAlgorithm {
+public class ErodeDilateAlgorithm extends AbstractAlgorithm {
 
-  public GrowFactorTestAlgorithm() {
+  public ErodeDilateAlgorithm() {
     super();
   }
 

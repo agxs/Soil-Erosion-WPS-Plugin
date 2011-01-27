@@ -5,20 +5,15 @@
 
 package tikouka.nl.wps.algorithm;
 
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
 import java.awt.image.WritableRaster;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
+
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.processing.AbstractProcessor;
@@ -28,11 +23,9 @@ import org.geotools.geometry.Envelope2D;
 import org.n52.wps.io.data.IData;
 import org.n52.wps.io.data.binding.complex.GTRasterDataBinding;
 import org.n52.wps.io.data.binding.literal.LiteralIntBinding;
-import org.n52.wps.io.data.binding.literal.LiteralStringBinding;
 import org.n52.wps.server.AbstractObservableAlgorithm;
-import org.xml.sax.SAXException;
-import tikouka.nl.wps.algorithm.util.Table;
-import tikouka.nl.wps.handler.XMLHandler;
+
+import com.sun.media.jai.codecimpl.util.RasterFactory;
 
 /**
  *
