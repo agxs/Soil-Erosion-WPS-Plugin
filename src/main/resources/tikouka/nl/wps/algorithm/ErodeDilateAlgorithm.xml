@@ -14,7 +14,7 @@ http://geoserver.itc.nl:8080/wps/schemas/wps/1.0.0/wpsDescribeProcess_response.x
 				<ows:Title>growFactor</ows:Title>
 				<ows:Abstract>growFactor</ows:Abstract>
 				<LiteralData>
-					<ows:DataType ows:reference="xs:int"></ows:DataType>
+					<ows:DataType ows:reference="xs:double"></ows:DataType>
           <ows:AllowedValues>
 						<ows:Value></ows:Value>
 					</ows:AllowedValues>

@@ -11,9 +11,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.geometry.Envelope2D;
 import org.n52.wps.io.data.IData;
 import org.n52.wps.io.data.binding.complex.GTRasterDataBinding;
-import org.n52.wps.io.data.binding.literal.LiteralIntBinding;
+import org.n52.wps.io.data.binding.literal.LiteralDoubleBinding;
 import org.n52.wps.server.AbstractAlgorithm;
 
 import es.unex.sextante.core.OutputFactory;
@@ -46,7 +47,7 @@ public class ErodeDilateAlgorithm extends AbstractAlgorithm {
     if ( id.equalsIgnoreCase( "landuse" ) ) {
      return GTRasterDataBinding.class;
    } else if ( id.equalsIgnoreCase( "growFactor" ) ) {
-     return LiteralIntBinding.class;
+     return LiteralDoubleBinding.class;
    }
    throw new RuntimeException( "Could not find datatype for id " + id );
   }
@@ -59,7 +60,7 @@ public class ErodeDilateAlgorithm extends AbstractAlgorithm {
     if ( inputData == null || !inputData.containsKey( "growFactor" ) ) {
       throw new RuntimeException( "Error while allocating input parameters 'growFactor'" );
     }
-    int growFactor = ((LiteralIntBinding)inputData.get( "growFactor" ).get( 0 )).getPayload();
+    double growFactor = ((LiteralDoubleBinding)inputData.get( "growFactor" ).get( 0 )).getPayload();
     
     if ( inputData == null || !inputData.containsKey( "landuse" ) ) {
       throw new RuntimeException( "Error while allocating input parameters 'landuse'" );
@@ -67,6 +68,20 @@ public class ErodeDilateAlgorithm extends AbstractAlgorithm {
     GridCoverage2D landuse = ((GTRasterDataBinding)inputData.get( "landuse" ).get( 0 )).getPayload();
 
     HashMap<String, IData> resulthash = new HashMap<String, IData>();
+    
+    // Converts metres to pixels
+    Envelope2D env = landuse.getEnvelope2D();
+    double minX = env.getMinX(); // min x extent in CRS
+    double maxX = env.getMaxX(); // max x extent in CRS
+    int width = (int)landuse.getGridGeometry().getGridRange2D().getWidth(); // width in pixels
+    double xPixelSize = (maxX - minX) / width; // width of pixel in CRS
+
+    double minY = env.getMinY();
+    double maxY = env.getMaxY();
+    int height = (int)landuse.getGridGeometry().getGridRange2D().getHeight();
+    double yPixelSize = (maxY - minY) / height;
+    double avgPixelSize = (xPixelSize + yPixelSize) / 2.0;
+    int growFactorPixels = (int)Math.round( growFactor / avgPixelSize );
     
     // Grow test
     try {
@@ -76,11 +91,11 @@ public class ErodeDilateAlgorithm extends AbstractAlgorithm {
       ErosionDilationAlgorithm alg = new ErosionDilationAlgorithm();
       
       ParametersSet params = alg.getParameters();
-      if ( growFactor < 0 ) {
+      if ( growFactorPixels < 0 ) {
         params.getParameter( ErosionDilationAlgorithm.OPERATION )
               .setParameterValue( ErosionDilationAlgorithm.ERODE );
       }
-      else if ( growFactor > 0 ) {
+      else if ( growFactorPixels > 0 ) {
         params.getParameter( ErosionDilationAlgorithm.OPERATION )
               .setParameterValue( ErosionDilationAlgorithm.DILATE );
       }
@@ -89,7 +104,7 @@ public class ErodeDilateAlgorithm extends AbstractAlgorithm {
         return resulthash;
       }
       params.getParameter( ErosionDilationAlgorithm.LAYER ).setParameterValue( landCover );
-      params.getParameter( ErosionDilationAlgorithm.RADIUS ).setParameterValue( growFactor );
+      params.getParameter( ErosionDilationAlgorithm.RADIUS ).setParameterValue( growFactorPixels );
       
       OutputObjectsSet outputs = alg.getOutputObjects();
       Output output = outputs.getOutput( ErosionDilationAlgorithm.RESULT );

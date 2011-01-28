@@ -13,20 +13,10 @@ import java.util.Map;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.n52.wps.io.data.IData;
 import org.n52.wps.io.data.binding.complex.GTRasterDataBinding;
-import org.n52.wps.io.data.binding.literal.LiteralIntBinding;
+import org.n52.wps.io.data.binding.literal.LiteralDoubleBinding;
 import org.n52.wps.server.AbstractAlgorithm;
 
 import tikouka.nl.wps.algorithm.util.GrowFactorFacade;
-
-import es.unex.sextante.core.OutputFactory;
-import es.unex.sextante.core.OutputObjectsSet;
-import es.unex.sextante.core.ParametersSet;
-import es.unex.sextante.core.Sextante;
-import es.unex.sextante.dataObjects.IRasterLayer;
-import es.unex.sextante.geotools.GTOutputFactory;
-import es.unex.sextante.geotools.GTRasterLayer;
-import es.unex.sextante.imageAnalysis.erosionDilation.ErosionDilationAlgorithm;
-import es.unex.sextante.outputs.Output;
 
 /**
  * 
@@ -48,7 +38,7 @@ public class GrowFactorFacadeAlgorithm extends AbstractAlgorithm {
     if ( id.equalsIgnoreCase( "landuse" ) ) {
      return GTRasterDataBinding.class;
    } else if ( id.equalsIgnoreCase( "growFactor" ) ) {
-     return LiteralIntBinding.class;
+     return LiteralDoubleBinding.class;
    }
    throw new RuntimeException( "Could not find datatype for id " + id );
   }
@@ -61,7 +51,7 @@ public class GrowFactorFacadeAlgorithm extends AbstractAlgorithm {
     if ( inputData == null || !inputData.containsKey( "growFactor" ) ) {
       throw new RuntimeException( "Error while allocating input parameters 'growFactor'" );
     }
-    int growFactor = ((LiteralIntBinding)inputData.get( "growFactor" ).get( 0 )).getPayload();
+    double growFactor = ((LiteralDoubleBinding)inputData.get( "growFactor" ).get( 0 )).getPayload();
     
     if ( inputData == null || !inputData.containsKey( "landuse" ) ) {
       throw new RuntimeException( "Error while allocating input parameters 'landuse'" );
