@@ -80,6 +80,7 @@ public class ErodeDilateAlgorithm extends AbstractAlgorithm {
     double maxY = env.getMaxY();
     int height = (int)landuse.getGridGeometry().getGridRange2D().getHeight();
     double yPixelSize = (maxY - minY) / height;
+    
     double avgPixelSize = (xPixelSize + yPixelSize) / 2.0;
     int growFactorPixels = (int)Math.round( growFactor / avgPixelSize );
     
