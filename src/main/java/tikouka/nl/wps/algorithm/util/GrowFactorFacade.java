@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.geometry.Envelope2D;
 import org.n52.wps.io.data.IData;
 import org.n52.wps.io.data.binding.complex.GTRasterDataBinding;
 import org.n52.wps.io.data.binding.literal.LiteralIntBinding;
@@ -41,7 +42,22 @@ public class GrowFactorFacade {
     }
     Map<String, List<IData>> params = new HashMap<String, List<IData>>();
     Map<String, IData> result;
+
+    // Converts metres to pixels
+    Envelope2D env = landcover.getEnvelope2D();
+    double minX = env.getMinX(); // min x extent in CRS
+    double maxX = env.getMaxX(); // max x extent in CRS
+    int width = (int)landcover.getGridGeometry().getGridRange2D().getWidth(); // width in pixels
+    double xPixelSize = (maxX - minX) / width; // width of pixel in CRS
+
+    double minY = env.getMinY();
+    double maxY = env.getMaxY();
+    int height = (int)landcover.getGridGeometry().getGridRange2D().getHeight();
+    double yPixelSize = (maxY - minY) / height;
+    double avgPixelSize = (xPixelSize + yPixelSize) / 2.0;
+    int growFactorPixels = (int)Math.round( growFactor / avgPixelSize );
     
+    // Start computing algorithms
     ReclassAlgorithm reclass = new ReclassAlgorithm();
     params.put( "nz_woody", Arrays.asList( (IData)new GTRasterDataBinding( landcover ) ) );
     params.put( "vtk", Arrays.asList( (IData)new LiteralIntBinding( 1 ) ) );
@@ -50,7 +66,7 @@ public class GrowFactorFacade {
     params.clear();
     ErodeDilateAlgorithm erodeDilate = new ErodeDilateAlgorithm();
     params.put( "landuse", Arrays.asList( result.get( "result" ) ) );
-    params.put( "growFactor", Arrays.asList( (IData)new LiteralIntBinding( (int)growFactor ) ) ); //todo convert from metres
+    params.put( "growFactor", Arrays.asList( (IData)new LiteralIntBinding( growFactorPixels ) ) );
     result = erodeDilate.run( params );
     
     params.clear();
