@@ -53,10 +53,10 @@ public class ReclassAlgorithm extends AbstractObservableAlgorithm
     }
 
     public Class getInputDataType(String id) {
-        if(id.equalsIgnoreCase("nz_woody")){
+        if(id.equalsIgnoreCase("landcover")){
 				return GTRasterDataBinding.class;
         }   
-        else if (id.equalsIgnoreCase("vtk")){
+        else if (id.equalsIgnoreCase("valueToKeep")){
             return LiteralIntBinding.class;
         }
 	throw new RuntimeException("Could not find datatype for id " + id);
@@ -69,30 +69,30 @@ public class ReclassAlgorithm extends AbstractObservableAlgorithm
        // ############################################################
         // READ THE INPUT DATA
         // ############################################################
-        if(inputData==null || !inputData.containsKey("nz_woody")){
-			throw new RuntimeException("Error while allocating input parameters 'nz_woody'");
+        if(inputData==null || !inputData.containsKey("landcover")){
+			throw new RuntimeException("Error while allocating input parameters 'landcover'");
 		}
-        GridCoverage2D nz_woody = ((GTRasterDataBinding) inputData.get("nz_woody").get(0)).getPayload();
+        GridCoverage2D landcover = ((GTRasterDataBinding) inputData.get("landcover").get(0)).getPayload();
 
-        if(inputData==null || !inputData.containsKey("vtk")){
-			throw new RuntimeException("Error while allocating input parameters");
+        if(inputData==null || !inputData.containsKey("valueToKeep")){
+			throw new RuntimeException("Error while allocating valueToKeep parameters");
 		}
-        int valuetokeep= ((LiteralIntBinding) inputData.get("vtk").get(0)).getPayload();
+        int valueToKeep= ((LiteralIntBinding) inputData.get("valueToKeep").get(0)).getPayload();
 
         // ############################################################
         //  RUN THE MODEL
         // ############################################################
 
-        Envelope2D res_env = new Envelope2D(nz_woody.getEnvelope2D());
+        Envelope2D res_env = new Envelope2D(landcover.getEnvelope2D());
 
         double minX = res_env.getMinX(); // min x extent in CRS
         double maxX = res_env.getMaxX(); // max y extent in CRS
-        int width = (int)nz_woody.getGridGeometry().getGridRange2D().getWidth(); // width in pixels
+        int width = (int)landcover.getGridGeometry().getGridRange2D().getWidth(); // width in pixels
         double x_x = (maxX - minX) / width; // width of pixel in CRS
 
         double minY = res_env.getMinY();
         double maxY = res_env.getMaxY();
-        int height = (int)nz_woody.getGridGeometry().getGridRange2D().getHeight();
+        int height = (int)landcover.getGridGeometry().getGridRange2D().getHeight();
         double y_y = (maxY - minY) / height;
 
         BufferedImage image = new BufferedImage((int)width,(int)height, BufferedImage.TYPE_BYTE_GRAY);
@@ -122,15 +122,15 @@ public class ReclassAlgorithm extends AbstractObservableAlgorithm
          try{
              for ( int y = 0; y < height; y++ ) {
                  for ( int x = 0; x < width; x++ ) {
-                    int[] woodyval= new int[1];
+                    int[] landcoverValue= new int[1];
                     double[] out = new double[1];
 
                     Point2D pt = new DirectPosition2D((minX + x_x / 2) + x * x_x, (minY + y_y / 2) + y * y_y);
 
-                    nz_woody.evaluate(pt, woodyval);
+                    landcover.evaluate(pt, landcoverValue);
 
-                    if (woodyval[0] == valuetokeep){
-                        out[0] = valuetokeep;
+                    if (landcoverValue[0] == valueToKeep){
+                        out[0] = valueToKeep;
                     }else{
                         out[0] = 0;
                     }

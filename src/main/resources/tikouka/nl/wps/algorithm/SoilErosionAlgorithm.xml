@@ -10,12 +10,12 @@ http://geoserver.itc.nl:8080/wps/schemas/wps/1.0.0/wpsDescribeProcess_response.x
 		<ows:Metadata xlink:title="so simple" />
 		<DataInputs>
 			<Input minOccurs="1" maxOccurs="1">
-				<ows:Identifier>rain_factor</ows:Identifier>
-				<ows:Title>rain_factor</ows:Title>
-				<ows:Abstract>rain_factor</ows:Abstract>
+				<ows:Identifier>rainfallExponent</ows:Identifier>
+				<ows:Title>The power to raise the rainfall layer to</ows:Title>
+				<ows:Abstract>The power to raise the rainfall layer to</ows:Abstract>
 				<LiteralData>
 					<ows:DataType ows:reference="xs:double"></ows:DataType>
-                                        <ows:AllowedValues>
+          <ows:AllowedValues>
 						<ows:Value></ows:Value>
 					</ows:AllowedValues>
 				</LiteralData>
@@ -42,10 +42,10 @@ http://geoserver.itc.nl:8080/wps/schemas/wps/1.0.0/wpsDescribeProcess_response.x
           </ows:AllowedValues>
         </LiteralData>
       </Input>
-                         <Input minOccurs="1" maxOccurs="1">
-				<ows:Identifier>nz_woody_lookup</ows:Identifier>
-				<ows:Title>woody Lookup Table</ows:Title>
-				<ows:Abstract>woody Lookup Table</ows:Abstract>
+      <Input minOccurs="1" maxOccurs="1">
+				<ows:Identifier>landcoverLookup</ows:Identifier>
+				<ows:Title>Landcover Lookup Table</ows:Title>
+				<ows:Abstract>Landcover Lookup Table</ows:Abstract>
 				<ComplexData>
 					<Default>
 						<Format>
@@ -61,65 +61,56 @@ http://geoserver.itc.nl:8080/wps/schemas/wps/1.0.0/wpsDescribeProcess_response.x
 					</Supported>
 				</ComplexData>
 			</Input>
-                        <Input minOccurs="1" maxOccurs="1">
-				<ows:Identifier>nz_woody</ows:Identifier>
-				<ows:Title>woody input layer</ows:Title>
-				<ows:Abstract>woody input layer</ows:Abstract>
+      <Input minOccurs="1" maxOccurs="1">
+				<ows:Identifier>landcover</ows:Identifier>
+				<ows:Title>Landcover input layer</ows:Title>
+				<ows:Abstract>Landcover input layer</ows:Abstract>
 				<ComplexData>
-
-				<Default>
-					<Format>
-						<MimeType>image/tiff</MimeType>
-					</Format>
-				</Default>
-				<Supported>
-					<Format>
-						<MimeType>image/tiff</MimeType>
-                                        </Format>
-				</Supported>
-
+  				<Default>
+  					<Format>
+  						<MimeType>image/tiff</MimeType>
+  					</Format>
+  				</Default>
+  				<Supported>
+  					<Format>
+  						<MimeType>image/tiff</MimeType>
+            </Format>
+  				</Supported>
 				</ComplexData>
-
 			</Input>
-                         <Input minOccurs="1" maxOccurs="1">
-				<ows:Identifier>nz_r2</ows:Identifier>
-				<ows:Title>rainfall input layer</ows:Title>
-				<ows:Abstract>rainfall input layer</ows:Abstract>
+      <Input minOccurs="1" maxOccurs="1">
+				<ows:Identifier>rainfall</ows:Identifier>
+				<ows:Title>Rainfall input layer</ows:Title>
+				<ows:Abstract>Rainfall input layer</ows:Abstract>
 				<ComplexData>
-
-				<Default>
-					<Format>
-						<MimeType>image/tiff</MimeType>
-					</Format>
-				</Default>
-				<Supported>
-					<Format>
-						<MimeType>image/tiff</MimeType>
-                                        </Format>
-				</Supported>
-
+  				<Default>
+  					<Format>
+  						<MimeType>image/tiff</MimeType>
+  					</Format>
+  				</Default>
+  				<Supported>
+  					<Format>
+  						<MimeType>image/tiff</MimeType>
+            </Format>
+	  			</Supported>
 				</ComplexData>
-
 			</Input>
-                         <Input minOccurs="1" maxOccurs="1">
-				<ows:Identifier>nz_ak2</ows:Identifier>
-				<ows:Title>slope geology input layer</ows:Title>
-				<ows:Abstract>slope geology input layer</ows:Abstract>
+      <Input minOccurs="1" maxOccurs="1">
+				<ows:Identifier>erosionCoefficients</ows:Identifier>
+				<ows:Title>Erosion Coefficients input layer</ows:Title>
+				<ows:Abstract>Erosoin Coefficients input layer</ows:Abstract>
 				<ComplexData>
-
-				<Default>
-					<Format>
-						<MimeType>image/tiff</MimeType>
-					</Format>
-				</Default>
-				<Supported>
-					<Format>
-						<MimeType>image/tiff</MimeType>
-                                        </Format>
-				</Supported>
-
+  				<Default>
+  					<Format>
+  						<MimeType>image/tiff</MimeType>
+  					</Format>
+  				</Default>
+  				<Supported>
+  					<Format>
+  						<MimeType>image/tiff</MimeType>
+            </Format>
+  				</Supported>
 				</ComplexData>
-
 			</Input>
 		</DataInputs>
 		<ProcessOutputs>

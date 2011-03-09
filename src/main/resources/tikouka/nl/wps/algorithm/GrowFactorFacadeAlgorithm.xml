@@ -21,9 +21,9 @@ http://geoserver.itc.nl:8080/wps/schemas/wps/1.0.0/wpsDescribeProcess_response.x
 				</LiteralData>
 			</Input>
       <Input minOccurs="1" maxOccurs="1">
-        <ows:Identifier>landuse</ows:Identifier>
-        <ows:Title>woody input layer</ows:Title>
-        <ows:Abstract>woody input layer</ows:Abstract>
+        <ows:Identifier>landcover</ows:Identifier>
+        <ows:Title>Landcover input layer</ows:Title>
+        <ows:Abstract>Landcover input layer</ows:Abstract>
         <ComplexData>
           <Default>
             <Format>

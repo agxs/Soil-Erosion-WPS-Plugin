@@ -8,58 +8,58 @@ http://geoserver.itc.nl:8080/wps/schemas/wps/1.0.0/wpsDescribeProcess_response.x
 		<ows:Metadata xlink:title="Grow" />
 		<ows:Metadata xlink:title="WPS" />
 		<DataInputs>
-                        <Input minOccurs="1" maxOccurs="1">
-				<ows:Identifier>nz_woody</ows:Identifier>
-				<ows:Title>woody input layer</ows:Title>
-				<ows:Abstract>woody input layer</ows:Abstract>
+      <Input minOccurs="1" maxOccurs="1">
+				<ows:Identifier>originalLandcover</ows:Identifier>
+				<ows:Title>Original Landcover Layer</ows:Title>
+				<ows:Abstract>Original Landcover Layer</ows:Abstract>
 				<ComplexData>
-				<Default>
-					<Format>
-						<MimeType>image/tiff</MimeType>
-					</Format>
-				</Default>
-				<Supported>
-					<Format>
-						<MimeType>image/tiff</MimeType>
-                                        </Format>
-				</Supported>
+  				<Default>
+  					<Format>
+  						<MimeType>image/tiff</MimeType>
+  					</Format>
+  				</Default>
+  				<Supported>
+  					<Format>
+  						<MimeType>image/tiff</MimeType>
+            </Format>
+  				</Supported>
 				</ComplexData>
 			</Input>
-                        <Input minOccurs="1" maxOccurs="1">
-				<ows:Identifier>reclassed</ows:Identifier>
-				<ows:Title>reclassed, buffered woody input layer</ows:Title>
-				<ows:Abstract>reclassed, buffered woody input layer</ows:Abstract>
+      <Input minOccurs="1" maxOccurs="1">
+				<ows:Identifier>reclassedLandcover</ows:Identifier>
+				<ows:Title>Reclassed Landcover from ReclassAlgorithm</ows:Title>
+				<ows:Abstract>Reclassed Landcover from ReclassAlgorithm</ows:Abstract>
 				<ComplexData>
-				<Default>
-					<Format>
-						<MimeType>image/tiff</MimeType>
-					</Format>
-				</Default>
-				<Supported>
-					<Format>
-						<MimeType>image/tiff</MimeType>
-                                        </Format>
-				</Supported>
+  				<Default>
+  					<Format>
+  						<MimeType>image/tiff</MimeType>
+  					</Format>
+  				</Default>
+  				<Supported>
+  					<Format>
+  						<MimeType>image/tiff</MimeType>
+            </Format>
+  				</Supported>
 				</ComplexData>
 			</Input>
-                        <Input minOccurs="1" maxOccurs="1">
-				<ows:Identifier>nonreclasseablevalue</ows:Identifier>
-				<ows:Title>nonreclasseablevalue</ows:Title>
-				<ows:Abstract>the nz_woody values that cannot be replaced by woody</ows:Abstract>
+      <Input minOccurs="1" maxOccurs="1">
+				<ows:Identifier>nonReclassableValue</ows:Identifier>
+				<ows:Title>Values that are not allowed to be overwritten from the original Landcover</ows:Title>
+				<ows:Abstract>Values that are not allowed to be overwritten from the original Landcover</ows:Abstract>
 				<LiteralData>
 					<ows:DataType ows:reference="xs:string"></ows:DataType>
-                                        <ows:AllowedValues>
+          <ows:AllowedValues>
 						<ows:Value></ows:Value>
 					</ows:AllowedValues>
 				</LiteralData>
 			</Input>
-                        <Input minOccurs="1" maxOccurs="1">
-				<ows:Identifier>reclassvalue</ows:Identifier>
-				<ows:Title>reclassvalue</ows:Title>
-				<ows:Abstract>the nz_woody values that represents woody</ows:Abstract>
+      <Input minOccurs="1" maxOccurs="1">
+				<ows:Identifier>reclassableValue</ows:Identifier>
+				<ows:Title>Value to me merged from Reclassed Landcover to Original Landcover</ows:Title>
+				<ows:Abstract>Value to me merged from Reclassed Landcover to Original Landcover</ows:Abstract>
 				<LiteralData>
 					<ows:DataType ows:reference="xs:string"></ows:DataType>
-                                        <ows:AllowedValues>
+          <ows:AllowedValues>
 						<ows:Value></ows:Value>
 					</ows:AllowedValues>
 				</LiteralData>
@@ -71,16 +71,16 @@ http://geoserver.itc.nl:8080/wps/schemas/wps/1.0.0/wpsDescribeProcess_response.x
 				<ows:Title>result</ows:Title>
 				<ows:Abstract>result</ows:Abstract>
 				<ComplexOutput>
-				<Default>
-					<Format>
-						<MimeType>image/tiff</MimeType>
-					</Format>
-				</Default>
-				<Supported>
-					<Format>
-						<MimeType>image/tiff</MimeType>
-					</Format>
-				</Supported>
+  				<Default>
+  					<Format>
+  						<MimeType>image/tiff</MimeType>
+  					</Format>
+  				</Default>
+  				<Supported>
+  					<Format>
+  						<MimeType>image/tiff</MimeType>
+  					</Format>
+  				</Supported>
 				</ComplexOutput>
 			</Output>
 		</ProcessOutputs>

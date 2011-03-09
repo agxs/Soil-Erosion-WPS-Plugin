@@ -35,7 +35,7 @@ public class GrowFactorFacadeAlgorithm extends AbstractAlgorithm {
   }
 
   public Class getInputDataType( String id ) {
-    if ( id.equalsIgnoreCase( "landuse" ) ) {
+    if ( id.equalsIgnoreCase( "landcover" ) ) {
      return GTRasterDataBinding.class;
    } else if ( id.equalsIgnoreCase( "growFactor" ) ) {
      return LiteralDoubleBinding.class;
@@ -53,17 +53,17 @@ public class GrowFactorFacadeAlgorithm extends AbstractAlgorithm {
     }
     double growFactor = ((LiteralDoubleBinding)inputData.get( "growFactor" ).get( 0 )).getPayload();
     
-    if ( inputData == null || !inputData.containsKey( "landuse" ) ) {
-      throw new RuntimeException( "Error while allocating input parameters 'landuse'" );
+    if ( inputData == null || !inputData.containsKey( "landcover" ) ) {
+      throw new RuntimeException( "Error while allocating input parameters 'landcover'" );
     }
-    GridCoverage2D landuse = ((GTRasterDataBinding)inputData.get( "landuse" ).get( 0 )).getPayload();
+    GridCoverage2D landCover = ((GTRasterDataBinding)inputData.get( "landcover" ).get( 0 )).getPayload();
 
     HashMap<String, IData> resulthash = new HashMap<String, IData>();
     
     GrowFactorFacade growFactorFacade = new GrowFactorFacade();
-    landuse = growFactorFacade.computeGrowFactor( growFactor, landuse );
+    landCover = growFactorFacade.computeGrowFactor( growFactor, landCover );
     
-    resulthash.put( "result", new GTRasterDataBinding( landuse ) );
+    resulthash.put( "result", new GTRasterDataBinding( landCover ) );
     return resulthash;
   }
 }

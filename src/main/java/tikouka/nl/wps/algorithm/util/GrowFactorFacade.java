@@ -45,24 +45,24 @@ public class GrowFactorFacade {
 
     // Start computing algorithms
     ReclassAlgorithm reclass = new ReclassAlgorithm();
-    params.put( "nz_woody", Arrays.asList( (IData)new GTRasterDataBinding( landcover ) ) );
-    params.put( "vtk", Arrays.asList( (IData)new LiteralIntBinding( 1 ) ) );
+    params.put( "landcover", Arrays.asList( (IData)new GTRasterDataBinding( landcover ) ) );
+    params.put( "valueToKeep", Arrays.asList( (IData)new LiteralIntBinding( 1 ) ) );
     result = reclass.run( params );
     
     params.clear();
     ErodeDilateAlgorithm erodeDilate = new ErodeDilateAlgorithm();
-    params.put( "landuse", Arrays.asList( result.get( "result" ) ) );
+    params.put( "landcover", Arrays.asList( result.get( "result" ) ) );
     params.put( "growFactor", Arrays.asList( (IData)new LiteralDoubleBinding( growFactor ) ) );
     result = erodeDilate.run( params );
     
     params.clear();
     CombineAlgorithm combine = new CombineAlgorithm();
-    params.put( "nz_woody", Arrays.asList( (IData)new GTRasterDataBinding( landcover ) ) );
-    params.put( "reclassed", Arrays.asList( result.get( "result" ) ) );
-    params.put( "nonreclasseablevalue", Arrays.asList( (IData)new LiteralStringBinding( "0,128,-9999" ) ) );
-    params.put( "reclassvalue", Arrays.asList( (IData)new LiteralStringBinding( "1" ) ) );
+    params.put( "originalLandcover", Arrays.asList( (IData)new GTRasterDataBinding( landcover ) ) );
+    params.put( "reclassedLandcover", Arrays.asList( result.get( "result" ) ) );
+    params.put( "nonReclassableValue", Arrays.asList( (IData)new LiteralStringBinding( "0,128,-9999" ) ) );
+    params.put( "reclassableValue", Arrays.asList( (IData)new LiteralStringBinding( "1" ) ) );
     result = combine.run( params );
     
-    return ((GTRasterDataBinding)result.get("result" )).getPayload();
+    return ((GTRasterDataBinding)result.get( "result" )).getPayload();
   }
 }

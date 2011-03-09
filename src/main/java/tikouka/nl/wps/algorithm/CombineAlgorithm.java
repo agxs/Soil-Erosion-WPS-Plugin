@@ -55,10 +55,10 @@ public class CombineAlgorithm extends AbstractObservableAlgorithm
     }
 
     public Class getInputDataType(String id) {
-        if(id.equalsIgnoreCase("nz_woody")||id.equalsIgnoreCase("reclassed")){
+        if(id.equalsIgnoreCase("originalLandcover")||id.equalsIgnoreCase("reclassedLandcover")){
 				return GTRasterDataBinding.class;
         }
-         else if (id.equalsIgnoreCase("nonreclasseablevalue")||id.equalsIgnoreCase("reclassvalue")){
+         else if (id.equalsIgnoreCase("nonReclassableValue")||id.equalsIgnoreCase("reclassableValue")){
             return LiteralStringBinding.class;
         }
 	throw new RuntimeException("Could not find datatype for id " + id);
@@ -71,54 +71,45 @@ public class CombineAlgorithm extends AbstractObservableAlgorithm
        // ############################################################
         // READ THE INPUT DATA
         // ############################################################
-        if(inputData==null || !inputData.containsKey("nz_woody")){
-			throw new RuntimeException("Error while allocating input parameters 'nz_woody'");
+        if(inputData==null || !inputData.containsKey("originalLandcover")){
+			throw new RuntimeException("Error while allocating input parameters 'originalLandcover'");
 		}
-        GridCoverage2D nz_woody = ((GTRasterDataBinding) inputData.get("nz_woody").get(0)).getPayload();
+        GridCoverage2D originalLandcover = ((GTRasterDataBinding) inputData.get("originalLandcover").get(0)).getPayload();
 
-        if(inputData==null || !inputData.containsKey("reclassed")){
-			throw new RuntimeException("Error while allocating input parameters 'reclassed'");
+        if(inputData==null || !inputData.containsKey("reclassedLandcover")){
+			throw new RuntimeException("Error while allocating input parameters 'reclassedLandcover'");
 		}
-        GridCoverage2D reclassed = ((GTRasterDataBinding) inputData.get("reclassed").get(0)).getPayload();
+        GridCoverage2D reclassedLandcover = ((GTRasterDataBinding) inputData.get("reclassedLandcover").get(0)).getPayload();
         
-        if(inputData==null || !inputData.containsKey("nonreclasseablevalue")){
-			throw new RuntimeException("Error while allocating input parameters 'nonreclasseablevalue'");
+        if(inputData==null || !inputData.containsKey("nonReclassableValue")){
+			throw new RuntimeException("Error while allocating input parameters 'nonReclassableValue'");
 		}
-        String nonreclasseablevalue = ((LiteralStringBinding)inputData.get("nonreclasseablevalue").get(0)).getPayload();
+        String nonReclassableValue = ((LiteralStringBinding)inputData.get("nonReclassableValue").get(0)).getPayload();
 
-        if(inputData==null || !inputData.containsKey("reclassvalue")){
-			throw new RuntimeException("Error while allocating input parameters 'reclassvalue'");
+        if(inputData==null || !inputData.containsKey("reclassableValue")){
+			throw new RuntimeException("Error while allocating input parameters 'reclassableValue'");
 		}
-        String reclassvalue = ((LiteralStringBinding)inputData.get("reclassvalue").get(0)).getPayload();
+        String reclassableValue = ((LiteralStringBinding)inputData.get("reclassableValue").get(0)).getPayload();
 
         // ############################################################
         //  RUN THE MODEL
         // ############################################################
 
-        String[] nrv = nonreclasseablevalue.split(",");
+        String[] nrv = nonReclassableValue.split(",");
 
-         Envelope2D res_env = new Envelope2D(nz_woody.getEnvelope2D());
-                Rectangle2D.intersect(nz_woody.getEnvelope2D(), reclassed.getEnvelope2D(), res_env);
+         Envelope2D res_env = new Envelope2D(originalLandcover.getEnvelope2D());
+                Rectangle2D.intersect(originalLandcover.getEnvelope2D(), reclassedLandcover.getEnvelope2D(), res_env);
 
         res_env.setRect((int)res_env.x, (int)res_env.y, (int)res_env.width, (int)res_env.height);
 
-        ParameterValueGroup param = processor.getOperation("CoverageCrop").getParameters();
-        param.parameter("Source").setValue(nz_woody);
-        param.parameter("envelope").setValue(res_env);
-        GridCoverage2D nz_woody_cr = (GridCoverage2D) processor.doOperation(param);
-
-        param.parameter("Source").setValue(reclassed);
-        param.parameter("envelope").setValue(res_env);
-        GridCoverage2D reclassed_cr = (GridCoverage2D) processor.doOperation(param);
-
         double minX = res_env.getMinX(); // min x extent in CRS
         double maxX = res_env.getMaxX(); // max y extent in CRS
-        int width = (int)nz_woody.getGridGeometry().getGridRange2D().getWidth(); // width in pixels
+        int width = (int)originalLandcover.getGridGeometry().getGridRange2D().getWidth(); // width in pixels
         double x_x = (maxX - minX) / width; // width of pixel in CRS
 
         double minY = res_env.getMinY();
         double maxY = res_env.getMaxY();
-        int height = (int)nz_woody.getGridGeometry().getGridRange2D().getHeight();
+        int height = (int)originalLandcover.getGridGeometry().getGridRange2D().getHeight();
         double y_y = (maxY - minY) / height;
 
         WritableRaster raster = RasterFactory.createBandedRaster( DataBuffer.TYPE_SHORT, width, height, 1, null );
@@ -143,27 +134,26 @@ public class CombineAlgorithm extends AbstractObservableAlgorithm
         try{
             for ( int y = 0; y < height; y++ ) {
                 for ( int x = 0; x < width; x++ ) {
-                    int[] woodyval= new int[1];
-                    int[] reclassedval= new int[1];
+                    int[] landcoverValue= new int[1];
+                    int[] reclassedValue= new int[1];
                     double[] out = new double[1];
 
                     Point2D pt = new DirectPosition2D((minX + x_x / 2) + x * x_x, (minY + y_y / 2) + y * y_y);
 
-                    nz_woody_cr.evaluate(pt, woodyval);
-                    reclassed_cr.evaluate(pt, reclassedval);
+                    originalLandcover.evaluate(pt, landcoverValue);
+                    reclassedLandcover.evaluate(pt, reclassedValue);
 
-
-                    if(reclassedval[0] == Integer.parseInt(reclassvalue)){
+                    if (reclassedValue[0] == Integer.parseInt(reclassableValue)) {
                         for (int l=0; l< nrv.length;l++){
-                            if(woodyval[0] == Integer.parseInt(nrv[l])){
-                                out[0] = woodyval[0];
+                            if(landcoverValue[0] == Integer.parseInt(nrv[l])){
+                                out[0] = landcoverValue[0];
                                 break;
                             }else{
-                                out[0] = Integer.parseInt(reclassvalue);
+                                out[0] = Integer.parseInt(reclassableValue);
                             }
                         }
-                    }else{
-                        out[0]=woodyval[0];
+                    } else {
+                        out[0]=landcoverValue[0];
                     }
 
                     raster.setPixel( x, height-y-1, out);
@@ -178,7 +168,6 @@ public class CombineAlgorithm extends AbstractObservableAlgorithm
         }
 
         GridCoverageFactory coverageFactory = new GridCoverageFactory();
-
 
         // ############################################################
         //  WRITE THE OUTPUT DATA

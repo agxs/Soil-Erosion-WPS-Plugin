@@ -9,31 +9,31 @@ http://geoserver.itc.nl:8080/wps/schemas/wps/1.0.0/wpsDescribeProcess_response.x
 		<ows:Metadata xlink:title="WPS" />
 		<DataInputs>
 			<Input minOccurs="1" maxOccurs="1">
-				<ows:Identifier>vtk</ows:Identifier>
-				<ows:Title>vtk</ows:Title>
-				<ows:Abstract>value to keep</ows:Abstract>
+				<ows:Identifier>valueToKeep</ows:Identifier>
+				<ows:Title>Value to extract from supplied Landcover image</ows:Title>
+				<ows:Abstract>Value to extract from supplied Landcover image</ows:Abstract>
 				<LiteralData>
 					<ows:DataType ows:reference="xs:int"></ows:DataType>
-                                        <ows:AllowedValues>
+          <ows:AllowedValues>
 						<ows:Value></ows:Value>
 					</ows:AllowedValues>
 				</LiteralData>
 			</Input>
-                        <Input minOccurs="1" maxOccurs="1">
-				<ows:Identifier>nz_woody</ows:Identifier>
-				<ows:Title>woody input layer</ows:Title>
-				<ows:Abstract>woody input layer</ows:Abstract>
+      <Input minOccurs="1" maxOccurs="1">
+				<ows:Identifier>landcover</ows:Identifier>
+				<ows:Title>Landcover input layer</ows:Title>
+				<ows:Abstract>Landcover input layer</ows:Abstract>
 				<ComplexData>
-				<Default>
-					<Format>
-						<MimeType>image/tiff</MimeType>
-					</Format>
-				</Default>
-				<Supported>
-					<Format>
-						<MimeType>image/tiff</MimeType>
-                                        </Format>
-				</Supported>
+  				<Default>
+  					<Format>
+  						<MimeType>image/tiff</MimeType>
+  					</Format>
+  				</Default>
+  				<Supported>
+  					<Format>
+  						<MimeType>image/tiff</MimeType>
+            </Format>
+  				</Supported>
 				</ComplexData>
 			</Input>
 		</DataInputs>

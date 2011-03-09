@@ -44,7 +44,7 @@ public class ErodeDilateAlgorithm extends AbstractAlgorithm {
   }
 
   public Class getInputDataType( String id ) {
-    if ( id.equalsIgnoreCase( "landuse" ) ) {
+    if ( id.equalsIgnoreCase( "landcover" ) ) {
      return GTRasterDataBinding.class;
    } else if ( id.equalsIgnoreCase( "growFactor" ) ) {
      return LiteralDoubleBinding.class;
@@ -62,23 +62,23 @@ public class ErodeDilateAlgorithm extends AbstractAlgorithm {
     }
     double growFactor = ((LiteralDoubleBinding)inputData.get( "growFactor" ).get( 0 )).getPayload();
     
-    if ( inputData == null || !inputData.containsKey( "landuse" ) ) {
-      throw new RuntimeException( "Error while allocating input parameters 'landuse'" );
+    if ( inputData == null || !inputData.containsKey( "landcover" ) ) {
+      throw new RuntimeException( "Error while allocating input parameters 'landcover'" );
     }
-    GridCoverage2D landuse = ((GTRasterDataBinding)inputData.get( "landuse" ).get( 0 )).getPayload();
+    GridCoverage2D landCover = ((GTRasterDataBinding)inputData.get( "landcover" ).get( 0 )).getPayload();
 
     HashMap<String, IData> resulthash = new HashMap<String, IData>();
     
     // Converts metres to pixels
-    Envelope2D env = landuse.getEnvelope2D();
+    Envelope2D env = landCover.getEnvelope2D();
     double minX = env.getMinX(); // min x extent in CRS
     double maxX = env.getMaxX(); // max x extent in CRS
-    int width = (int)landuse.getGridGeometry().getGridRange2D().getWidth(); // width in pixels
+    int width = (int)landCover.getGridGeometry().getGridRange2D().getWidth(); // width in pixels
     double xPixelSize = (maxX - minX) / width; // width of pixel in CRS
 
     double minY = env.getMinY();
     double maxY = env.getMaxY();
-    int height = (int)landuse.getGridGeometry().getGridRange2D().getHeight();
+    int height = (int)landCover.getGridGeometry().getGridRange2D().getHeight();
     double yPixelSize = (maxY - minY) / height;
     
     double avgPixelSize = (xPixelSize + yPixelSize) / 2.0;
@@ -87,8 +87,8 @@ public class ErodeDilateAlgorithm extends AbstractAlgorithm {
     // Grow test
     try {
       Sextante.initialize();
-      GTRasterLayer landCover = new GTRasterLayer();
-      landCover.create( landuse );
+      GTRasterLayer landCoverRaster = new GTRasterLayer();
+      landCoverRaster.create( landCover );
       ErosionDilationAlgorithm alg = new ErosionDilationAlgorithm();
       
       ParametersSet params = alg.getParameters();
@@ -101,10 +101,10 @@ public class ErodeDilateAlgorithm extends AbstractAlgorithm {
               .setParameterValue( ErosionDilationAlgorithm.DILATE );
       }
       else {
-        resulthash.put( "result", new GTRasterDataBinding( landuse ) );
+        resulthash.put( "result", new GTRasterDataBinding( landCover ) );
         return resulthash;
       }
-      params.getParameter( ErosionDilationAlgorithm.LAYER ).setParameterValue( landCover );
+      params.getParameter( ErosionDilationAlgorithm.LAYER ).setParameterValue( landCoverRaster );
       params.getParameter( ErosionDilationAlgorithm.RADIUS ).setParameterValue( growFactorPixels );
       
       OutputObjectsSet outputs = alg.getOutputObjects();
@@ -112,9 +112,9 @@ public class ErodeDilateAlgorithm extends AbstractAlgorithm {
       OutputFactory outputFactory = new GTOutputFactory();
       alg.execute( null, outputFactory );
       IRasterLayer result = (IRasterLayer)output.getOutputObject();
-      GridCoverage2D woody_grown = (GridCoverage2D)result.getBaseDataObject();
+      GridCoverage2D resultCoverage = (GridCoverage2D)result.getBaseDataObject();
 
-      resulthash.put( "result", new GTRasterDataBinding( woody_grown ) );
+      resulthash.put( "result", new GTRasterDataBinding( resultCoverage ) );
     } catch ( Exception e ) {
       e.printStackTrace();
     }

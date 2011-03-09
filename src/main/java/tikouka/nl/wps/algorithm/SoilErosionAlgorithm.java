@@ -62,12 +62,12 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm {
   }
 
   public Class getInputDataType( String id ) {
-    if ( id.equalsIgnoreCase( "nz_woody" ) || id.equalsIgnoreCase( "nz_ak2" ) ||
-         id.equalsIgnoreCase( "nz_r2" ) ) {
+    if ( id.equalsIgnoreCase( "landcover" ) || id.equalsIgnoreCase( "erosionCoefficients" ) ||
+         id.equalsIgnoreCase( "rainfall" ) ) {
       return GTRasterDataBinding.class;
-    } else if ( id.equalsIgnoreCase( "nz_woody_lookup" ) ) {
+    } else if ( id.equalsIgnoreCase( "landcoverLookup" ) ) {
       return LiteralStringBinding.class;
-    } else if ( id.equalsIgnoreCase( "rain_factor" ) ) {
+    } else if ( id.equalsIgnoreCase( "rainfallExponent" ) ) {
       return LiteralDoubleBinding.class;
     } else if ( id.equalsIgnoreCase( "growFactor" ) ) {
       return LiteralDoubleBinding.class;
@@ -86,75 +86,74 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm {
     // ############################################################
     
     // Landcover Lookup Table
-    if ( inputData == null || !inputData.containsKey( "nz_woody_lookup" ) ) {
-      throw new RuntimeException( "Error while allocating input parameters" );
+    if ( inputData == null || !inputData.containsKey( "landcoverLookup" ) ) {
+      throw new RuntimeException( "Error while allocating landcoverLookup parameters" );
     }
-    List<IData> nz_woody_lookup = inputData.get( "nz_woody_lookup" );
+    List<IData> landcoverLookup = inputData.get( "landcoverLookup" );
 
     // Rainfall Exponent
-    if ( inputData == null || !inputData.containsKey( "rain_factor" ) ) {
-      throw new RuntimeException( "Error while allocating input parameters" );
+    if ( inputData == null || !inputData.containsKey( "rainfallExponent" ) ) {
+      throw new RuntimeException( "Error while allocating rainfallExponent parameters" );
     }
-    double rain_factor[] = new double[1];
-    rain_factor[0] = ((LiteralDoubleBinding)inputData.get( "rain_factor" ).get( 0 )).getPayload();
+    double rainfallExponent = ((LiteralDoubleBinding)inputData.get( "rainfallExponent" ).get( 0 )).getPayload();
 
     // Grow Factor
     if ( inputData == null || !inputData.containsKey( "growFactor" ) ) {
-      throw new RuntimeException( "Error while allocating input parameters" );
+      throw new RuntimeException( "Error while allocating growFactor parameters" );
     }
     double growFactor = ((LiteralDoubleBinding)inputData.get( "growFactor" ).get( 0 )).getPayload();
     
     // Stream Connectivity
-    if ( inputData == null || !inputData.containsKey( "growFactor" ) ) {
-      throw new RuntimeException( "Error while allocating input parameters" );
+    if ( inputData == null || !inputData.containsKey( "streamConnectivity" ) ) {
+      throw new RuntimeException( "Error while allocating streamConnectivity parameters" );
     }
     double streamConnectivity = ((LiteralDoubleBinding)inputData.get( "streamConnectivity" ).get( 0 )).getPayload();
     
     // Landcover raster
-    if ( inputData == null || !inputData.containsKey( "nz_woody" ) ) {
-      throw new RuntimeException( "Error while allocating input parameters 'landuse'" );
+    if ( inputData == null || !inputData.containsKey( "landcover" ) ) {
+      throw new RuntimeException( "Error while allocating landcover parameters" );
     }
-    GridCoverage2D nz_woody = ((GTRasterDataBinding)inputData.get( "nz_woody" ).get( 0 )).getPayload();
+    GridCoverage2D landcover = ((GTRasterDataBinding)inputData.get( "landcover" ).get( 0 )).getPayload();
 
     // Erosion Coefficient Raster
-    if ( inputData == null || !inputData.containsKey( "nz_ak2" ) ) {
-      throw new RuntimeException( "Error while allocating input parameters 'landuse'" );
+    if ( inputData == null || !inputData.containsKey( "erosionCoefficients" ) ) {
+      throw new RuntimeException( "Error while allocating erosionCoefficients parameters" );
     }
-    GridCoverage2D nz_ak2 = ((GTRasterDataBinding)inputData.get( "nz_ak2" ).get( 0 )).getPayload();
+    GridCoverage2D erosionCoefficients = ((GTRasterDataBinding)inputData.get( "erosionCoefficients" ).get( 0 )).getPayload();
 
     // Rainfall Raster
-    if ( inputData == null || !inputData.containsKey( "nz_r2" ) ) {
-      throw new RuntimeException( "Error while allocating input parameters 'landuse'" );
+    if ( inputData == null || !inputData.containsKey( "rainfall" ) ) {
+      throw new RuntimeException( "Error while allocating rainfall parameters" );
     }
-    GridCoverage2D nz_r2 = ((GTRasterDataBinding)inputData.get( "nz_r2" ).get( 0 )).getPayload();
+    GridCoverage2D rainfall = ((GTRasterDataBinding)inputData.get( "rainfall" ).get( 0 )).getPayload();
     // ############################################################
     // PARSE THE LOOKUPTABLE
     // ############################################################
-    Map<Integer, Integer> woodylutList = getLookupTableData( nz_woody_lookup );
+    Map<Integer, Integer> landcoverLutList = getLookupTableData( landcoverLookup );
 
     // ############################################################
     // RUN THE MODEL
     // ############################################################
 
-    Envelope2D res_env = new Envelope2D( nz_woody.getEnvelope2D() );
-    Rectangle2D.intersect( nz_woody.getEnvelope2D(), nz_ak2.getEnvelope2D(), res_env );
+    Envelope2D res_env = new Envelope2D( landcover.getEnvelope2D() );
+    Rectangle2D.intersect( landcover.getEnvelope2D(), erosionCoefficients.getEnvelope2D(), res_env );
 
-    Rectangle2D.intersect( res_env, nz_r2.getEnvelope2D(), res_env );
+    Rectangle2D.intersect( res_env, rainfall.getEnvelope2D(), res_env );
 
     res_env.setRect( (int)res_env.x, (int)res_env.y, (int)res_env.width, (int)res_env.height );
 
-    // Choose width per pixel basedon original image?
+    // Choose width per pixel based on original image?
     // Use a supplied parameter?
     // What about interpolation algorithm?
     // Nearest neighbour by default by the looks of it
     double minX = res_env.getMinX(); // min x extent in CRS
     double maxX = res_env.getMaxX(); // max y extent in CRS
-    int width = (int)nz_woody.getGridGeometry().getGridRange2D().getWidth(); // width in pixels
+    int width = (int)landcover.getGridGeometry().getGridRange2D().getWidth(); // width in pixels
     double x_x = (maxX - minX) / width; // width of pixel in CRS
 
     double minY = res_env.getMinY();
     double maxY = res_env.getMaxY();
-    int height = (int)nz_woody.getGridGeometry().getGridRange2D().getHeight();
+    int height = (int)landcover.getGridGeometry().getGridRange2D().getHeight();
     double y_y = (maxY - minY) / height;
 
     float[][] raster = new float[height][width];
@@ -179,29 +178,29 @@ public class SoilErosionAlgorithm extends AbstractObservableAlgorithm {
     
     // Apply grow factor
     GrowFactorFacade growFactorFacade = new GrowFactorFacade();
-    nz_woody = growFactorFacade.computeGrowFactor( growFactor, nz_woody );
+    landcover = growFactorFacade.computeGrowFactor( growFactor, landcover );
 
     // GeometryFactory geomFac = new GeometryFactory();
 
     try {
       for ( int y = 0; y < height; y++ ) {
         for ( int x = 0; x < width; x++ ) {
-          int[] woodyval = new int[1];
-          double[] r2_rval = new double[1];
-          double[] ak2_rval = new double[1];
+          int[] landcoverValue = new int[1];
+          double[] rainfallValue = new double[1];
+          double[] erosionCoefValue = new double[1];
           double[] out = new double[1];
 
           // Translates pixel space to world coordinates
           Point2D pt = new DirectPosition2D( (minX + x_x / 2) + x * x_x, (minY + y_y / 2) + y * y_y );
 
-          nz_woody.evaluate( pt, woodyval );
-          nz_r2.evaluate( pt, r2_rval );
-          nz_ak2.evaluate( pt, ak2_rval );
+          landcover.evaluate( pt, landcoverValue );
+          rainfall.evaluate( pt, rainfallValue );
+          erosionCoefficients.evaluate( pt, erosionCoefValue );
 
-          int woodyvallookup = woodylutList.get( woodyval[0] );
+          int landcoverValueLookup = landcoverLutList.get( landcoverValue[0] );
 
-          out[0] = woodyvallookup * Math.pow( r2_rval[0], rain_factor[0] ) * 
-                   ak2_rval[0] * streamConnectivity;
+          out[0] = landcoverValueLookup * Math.pow( rainfallValue[0], rainfallExponent ) * 
+                   erosionCoefValue[0] * streamConnectivity;
 
           // Geotools assumes y=0 is the bottom and not the top, unless screen
           // coordinates.
