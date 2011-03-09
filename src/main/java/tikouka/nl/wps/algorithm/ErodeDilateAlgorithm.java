@@ -95,6 +95,7 @@ public class ErodeDilateAlgorithm extends AbstractAlgorithm {
       if ( growFactorPixels < 0 ) {
         params.getParameter( ErosionDilationAlgorithm.OPERATION )
               .setParameterValue( ErosionDilationAlgorithm.ERODE );
+        growFactorPixels = Math.abs( growFactorPixels );
       }
       else if ( growFactorPixels > 0 ) {
         params.getParameter( ErosionDilationAlgorithm.OPERATION )
@@ -104,6 +105,14 @@ public class ErodeDilateAlgorithm extends AbstractAlgorithm {
         resulthash.put( "result", new GTRasterDataBinding( landCover ) );
         return resulthash;
       }
+      // Erosion algorithm has a max value of 20
+      if ( growFactorPixels > 20 ) {
+        growFactorPixels = 20;
+      }
+      if ( growFactorPixels < 1 ) {
+        growFactorPixels = 1;
+      }
+
       params.getParameter( ErosionDilationAlgorithm.LAYER ).setParameterValue( landCoverRaster );
       params.getParameter( ErosionDilationAlgorithm.RADIUS ).setParameterValue( growFactorPixels );
       

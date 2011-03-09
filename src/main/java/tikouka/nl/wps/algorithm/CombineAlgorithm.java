@@ -153,7 +153,14 @@ public class CombineAlgorithm extends AbstractObservableAlgorithm
                             }
                         }
                     } else {
+                      // Make sure to replace eroded woody areas with land
+                      if ( landcoverValue[0] == Integer.parseInt( reclassableValue ) ) {
+                        out[0] = 10; // TODO hard coded land here, should pass in as parameter
+                      }
+                      else {
+                        // Otherwise use the original value
                         out[0]=landcoverValue[0];
+                      }
                     }
 
                     raster.setPixel( x, height-y-1, out);
