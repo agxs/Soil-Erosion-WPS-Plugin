@@ -1,0 +1,35 @@
+Building
+--------
+
+Simply type "mvn package" to compile the plugin. You may need to follow the instructions at http://52north.org/communities/geoprocessing/wps/tutorials/WPSJEEHelios.html to make sure you can compile the 52North WPS.
+
+Installation
+------------
+
+This plugin requires an already installed copy of the 52North WPS(http://52north.org/communities/geoprocessing/wps/download.html), version 2.0-RC6 is the one that has been tested.
+
+Copy the generated JAR file from the compilation to WEB-INF/lib in the 52N WPS context.
+
+The provided RasterTable.xsd needs to be hosted on a webserver somewhere that the WPS context has access to.
+
+Next edit the config/wps_config.xml file in the WPS. Add the following XML fragments to it(note that the <web server url> should be replaced with the URL of your actual web server):
+
+  This should go at the end of the Parser section:
+
+  <Parser name="LCR_XMLParser" className="tikouka.nl.wps.parser.XMLParser">
+    <Property name="supportedSchema"><web server url>/RasterTable.xsd</Property>
+    <Property name="supportedFormat">text/xml</Property>
+    <Property name="supportedEncoding">UTF-8</Property>
+  </Parser>
+
+  This should go in the repository section:
+
+  <Repository name="TikoukaAlgorithmRepository" className="tikouka.nl.wps.TikoukaAlgorithmRepository">
+    <Property name="Algorithm">tikouka.nl.wps.algorithm.HelloAlgorithm</Property>
+    <Property name="Algorithm">tikouka.nl.wps.algorithm.SoilErosionAlgorithm</Property>
+    <Property name="Algorithm">tikouka.nl.wps.algorithm.ErodeDilateAlgorithm</Property>
+    <Property name="Algorithm">tikouka.nl.wps.algorithm.ReclassAlgorithm</Property>
+    <Property name="Algorithm">tikouka.nl.wps.algorithm.CombineAlgorithm</Property>
+    <Property name="Algorithm">tikouka.nl.wps.algorithm.GrowFactorFacadeAlgorithm</Property>
+  </Repository>
+
